@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>768002894558-cn6rn5lb3i035srdudgl1q2g1joret0p.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.768002894558-cn6rn5lb3i035srdudgl1q2g1joret0p</string>
+	<key>API_KEY</key>
+	<string>AIzaSyDzE4ppUVzg3piCS_U6uCHfuKntfUX1qPE</string>
+	<key>GCM_SENDER_ID</key>
+	<string>768002894558</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.example.takeiteasy</string>
+	<key>PROJECT_ID</key>
+	<string>tcu-tie</string>
+	<key>STORAGE_BUCKET</key>
+	<string>tcu-tie.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:768002894558:ios:f3f7166b3a7c1a0e74b04f</string>
+</dict>
+</plist>
