@@ -36,7 +36,7 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'TCU Take it Easy (Unofficial)',
+      title: 'TCU Take it Easier (Unofficial)',
       theme: ThemeData(
         primarySwatch: Colors.lightBlue,
         textTheme: GoogleFonts.mPlus1pTextTheme(
@@ -53,7 +53,7 @@ class _MyAppState extends State<MyApp> {
       themeMode: _themeMode,
       debugShowCheckedModeBanner: false,
       home: MyHomePage(
-        title: 'Take it Easy (Unofficial)',
+        title: 'Take it Easier (Unofficial)',
         onToggleTheme: _toggleTheme,
       ),
     );
@@ -106,7 +106,7 @@ class _MyHomePageState extends State<MyHomePage> {
   List<bool> areGradesSelected = [];
   final List<String> grades = ['1', '2', '3', '4'];
   List<bool> areTermsSelected = [];
-  final List<String> terms = ['前期前', '前期後', '前期', '前集中', '通年'];
+  final List<String> terms = ['後期前', '後期後', '後期', '後集中', '通年'];
   List<bool> areCategoriesSelected = [];
   final List<String> categories = [
     '教養',
@@ -237,14 +237,14 @@ class _MyHomePageState extends State<MyHomePage> {
               data.firstWhere((element) => element['講義コード'] == id);
           if (item["時限"].contains("${weekdays[j]}${times[i]}")) {
             switch (item["学期"]) {
-              case '前期':
+              case '後期':
                 formerCell += "${item["科目名"]}\n";
                 latterCell += "${item["科目名"]}\n";
                 break;
-              case '前期前':
+              case '後期前':
                 formerCell += "${item["科目名"]}\n";
                 break;
-              case '前期後':
+              case '後期後':
                 latterCell += "${item["科目名"]}\n";
                 break;
 
@@ -262,7 +262,7 @@ class _MyHomePageState extends State<MyHomePage> {
     for (String id in tookClasses) {
       Map<String, dynamic> item =
           data.firstWhere((element) => element['講義コード'] == id);
-      if (item["学期"] == '前集中') {
+      if (item["学期"] == '後集中') {
         intensiveClasses.add(item["科目名"]);
       }
     }
@@ -395,7 +395,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 ? Colors.grey[800]
                 : Colors.white,
             title: const Text(
-              'TCU-TiE ver.2023/4/11',
+              'TCU-TiE ver.2023/8/3',
               style: TextStyle(
                 color: Colors.lightBlue,
                 fontSize: 18,
@@ -1045,18 +1045,21 @@ class _MyHomePageState extends State<MyHomePage> {
                                         : Colors.black,
                                     borderRadius: BorderRadius.circular(10)),
                                 children: [
-                                  const TableRow(children: [
-                                    TableCell(
-                                        child: Text(
-                                      '分類',
-                                      textAlign: TextAlign.center,
-                                    )),
-                                    TableCell(
-                                        child: Text(
-                                      '単位数',
-                                      textAlign: TextAlign.center,
-                                    )),
-                                  ]),
+                                  TableRow(
+                                      decoration: BoxDecoration(
+                                          color: Theme.of(context).cardColor),
+                                      children: const [
+                                        TableCell(
+                                            child: Text(
+                                          '分類',
+                                          textAlign: TextAlign.center,
+                                        )),
+                                        TableCell(
+                                            child: Text(
+                                          '単位数',
+                                          textAlign: TextAlign.center,
+                                        )),
+                                      ]),
                                   for (int i = 0;
                                       i < categories.length - 1;
                                       i++)
