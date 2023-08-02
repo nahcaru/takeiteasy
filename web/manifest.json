@@ -1,11 +1,11 @@
 {
-    "name": "takeiteasy",
-    "short_name": "takeiteasy",
+    "name": "TCU Take it Easier",
+    "short_name": "TCU-TiE",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "description": "履修登録をもっと簡単に",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
