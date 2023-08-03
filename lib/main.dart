@@ -140,8 +140,6 @@ class _MyHomePageState extends State<MyHomePage> {
     areCategoriesSelected = List.filled(categories.length, true);
     areCompulsoriesSelected = List.filled(compulsories.length, true);
     tookCredits = List.filled(categories.length, 0);
-    formerClasses = List.filled(times.length, List.filled(weekdays.length, ''));
-    latterClasses = List.filled(times.length, List.filled(weekdays.length, ''));
     _searchController.addListener(filterData);
   }
 
@@ -233,10 +231,20 @@ class _MyHomePageState extends State<MyHomePage> {
   void setTable() {
     formerClassNames = [];
     latterClassNames = [];
+    /*
+    formerClasses = List.filled(times.length, List.filled(weekdays.length, ''));
+    latterClasses = List.filled(times.length, List.filled(weekdays.length, ''));
+    */
+    formerClasses = [];
+    latterClasses = [];
     for (int i = 0; i < times.length; i++) {
+      List<String> formerNamesRow = [];
+      List<String> latterNamesRow = [];
       List<String> formerRow = [];
       List<String> latterRow = [];
       for (int j = 0; j < weekdays.length; j++) {
+        String formerNamesCell = '';
+        String latterNamesCell = '';
         String formerCell = '';
         String latterCell = '';
         for (String id in tookClasses) {
@@ -245,36 +253,47 @@ class _MyHomePageState extends State<MyHomePage> {
           if (item['時限'].contains('${weekdays[j]}${times[i]}')) {
             switch (item['学期']) {
               case '後期':
-                formerCell += '${item['科目名']}\n';
-                latterCell += '${item['科目名']}\n';
+                formerNamesCell += '${item['科目名']}\n';
+                latterNamesCell += '${item['科目名']}\n';
+                /*
                 formerClasses[i][j] = item['講義コード'];
                 latterClasses[i][j] = item['講義コード'];
+                */
+                formerCell = item['講義コード'];
+                latterCell = item['講義コード'];
                 break;
               case '後期前':
-                formerCell += '${item['科目名']}\n';
-                formerClasses[i][j] = item['講義コード'];
+                formerNamesCell += '${item['科目名']}\n';
+                formerCell = item['講義コード'];
                 break;
               case '後期後':
-                latterCell += '${item['科目名']}\n';
-                latterClasses[i][j] = item['講義コード'];
+                latterNamesCell += '${item['科目名']}\n';
+                latterCell = item['講義コード'];
+
                 break;
 
               default:
             }
           }
         }
+        formerNamesRow.add(formerNamesCell);
+        latterNamesRow.add(latterNamesCell);
         formerRow.add(formerCell);
         latterRow.add(latterCell);
       }
-      formerClassNames.add(formerRow);
-      latterClassNames.add(latterRow);
+      formerClassNames.add(formerNamesRow);
+      latterClassNames.add(latterNamesRow);
+      formerClasses.add(formerRow);
+      latterClasses.add(latterRow);
     }
     intensiveClassNames = [];
+    intensiveClasses = [];
     for (String id in tookClasses) {
       Map<String, dynamic> item =
           data.firstWhere((element) => element['講義コード'] == id);
       if (item['学期'] == '後集中') {
         intensiveClassNames.add(item['科目名']);
+        intensiveClasses.add(item['講義コード']);
       }
     }
   }
@@ -1061,21 +1080,62 @@ class _MyHomePageState extends State<MyHomePage> {
                                                       intensiveClassNames
                                                           .length;
                                                   i++)
-                                                Container(
-                                                  margin:
-                                                      const EdgeInsets.all(5),
-                                                  height: 50,
-                                                  decoration: BoxDecoration(
-                                                      color: Colors.lightBlue
-                                                          .withAlpha(64),
-                                                      borderRadius:
-                                                          const BorderRadius
-                                                                  .all(
-                                                              Radius.circular(
-                                                                  15))),
-                                                  child: Center(
-                                                    child: Text(
-                                                      intensiveClassNames[i],
+                                                InkWell(
+                                                  onTap: () {
+                                                    Map<String, dynamic>
+                                                        item = data.firstWhere(
+                                                            (element) =>
+                                                                element[
+                                                                    '講義コード'] ==
+                                                                intensiveClasses[
+                                                                    i]);
+                                                    String info = (item['クラス'] +
+                                                            ' ' +
+                                                            item['備考'])
+                                                        .trim();
+                                                    showDialog(
+                                                      context: context,
+                                                      builder: (BuildContext
+                                                          context) {
+                                                        return AlertDialog(
+                                                          title: (info == '')
+                                                              ? Text(
+                                                                  item['科目名'])
+                                                              : Text(
+                                                                  '($info) ${item['科目名']}'),
+                                                          content:
+                                                              SelectionArea(
+                                                            child: Row(
+                                                              mainAxisAlignment:
+                                                                  MainAxisAlignment
+                                                                      .start,
+                                                              children: [
+                                                                Text(
+                                                                    '講義コード\n${item['講義コード']}\n\n教室\n${item['教室']}\n\n担当者\n${item['担当者']}'),
+                                                              ],
+                                                            ),
+                                                          ),
+                                                          scrollable: true,
+                                                        );
+                                                      },
+                                                    );
+                                                  },
+                                                  child: Container(
+                                                    margin:
+                                                        const EdgeInsets.all(5),
+                                                    height: 50,
+                                                    decoration: BoxDecoration(
+                                                        color: Colors.lightBlue
+                                                            .withAlpha(64),
+                                                        borderRadius:
+                                                            const BorderRadius
+                                                                    .all(
+                                                                Radius.circular(
+                                                                    15))),
+                                                    child: Center(
+                                                      child: Text(
+                                                        intensiveClassNames[i],
+                                                      ),
                                                     ),
                                                   ),
                                                 ),
