@@ -1,3 +1,5 @@
+//import 'dart:ffi';
+
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -95,14 +97,17 @@ class _MyHomePageState extends State<MyHomePage> {
   List<Map<String, dynamic>> data = [];
   List<Map<String, dynamic>> filtered = [];
   List<String> tookClasses = [];
-  List<int> tookCredits = [];
-  List<String> weekdays = ["月", "火", "水", "木", "金", "土"];
-  List<String> times = ["1", "2", "3", "4", "5", "6"];
+  List<double> tookCredits = [];
+  List<String> weekdays = ['月', '火', '水', '木', '金', '土'];
+  List<String> times = ['1', '2', '3', '4', '5', '6'];
+  List<List<String>> formerClassNames = [];
+  List<List<String>> latterClassNames = [];
+  List<String> intensiveClassNames = [];
   List<List<String>> formerClasses = [];
   List<List<String>> latterClasses = [];
   List<String> intensiveClasses = [];
   List<bool> areDepartmentsSelected = [];
-  final List<String> departments = ['共通', '情科'];
+  final List<String> departments = ['共通', '情科', '知能'];
   List<bool> areGradesSelected = [];
   final List<String> grades = ['1', '2', '3', '4'];
   List<bool> areTermsSelected = [];
@@ -135,6 +140,8 @@ class _MyHomePageState extends State<MyHomePage> {
     areCategoriesSelected = List.filled(categories.length, true);
     areCompulsoriesSelected = List.filled(compulsories.length, true);
     tookCredits = List.filled(categories.length, 0);
+    formerClasses = List.filled(times.length, List.filled(weekdays.length, ''));
+    latterClasses = List.filled(times.length, List.filled(weekdays.length, ''));
     _searchController.addListener(filterData);
   }
 
@@ -224,28 +231,32 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void setTable() {
-    formerClasses = [];
-    latterClasses = [];
+    formerClassNames = [];
+    latterClassNames = [];
     for (int i = 0; i < times.length; i++) {
       List<String> formerRow = [];
       List<String> latterRow = [];
       for (int j = 0; j < weekdays.length; j++) {
-        String formerCell = "";
-        String latterCell = "";
+        String formerCell = '';
+        String latterCell = '';
         for (String id in tookClasses) {
           Map<String, dynamic> item =
               data.firstWhere((element) => element['講義コード'] == id);
-          if (item["時限"].contains("${weekdays[j]}${times[i]}")) {
-            switch (item["学期"]) {
+          if (item['時限'].contains('${weekdays[j]}${times[i]}')) {
+            switch (item['学期']) {
               case '後期':
-                formerCell += "${item["科目名"]}\n";
-                latterCell += "${item["科目名"]}\n";
+                formerCell += '${item['科目名']}\n';
+                latterCell += '${item['科目名']}\n';
+                formerClasses[i][j] = item['講義コード'];
+                latterClasses[i][j] = item['講義コード'];
                 break;
               case '後期前':
-                formerCell += "${item["科目名"]}\n";
+                formerCell += '${item['科目名']}\n';
+                formerClasses[i][j] = item['講義コード'];
                 break;
               case '後期後':
-                latterCell += "${item["科目名"]}\n";
+                latterCell += '${item['科目名']}\n';
+                latterClasses[i][j] = item['講義コード'];
                 break;
 
               default:
@@ -255,15 +266,15 @@ class _MyHomePageState extends State<MyHomePage> {
         formerRow.add(formerCell);
         latterRow.add(latterCell);
       }
-      formerClasses.add(formerRow);
-      latterClasses.add(latterRow);
+      formerClassNames.add(formerRow);
+      latterClassNames.add(latterRow);
     }
-    intensiveClasses = [];
+    intensiveClassNames = [];
     for (String id in tookClasses) {
       Map<String, dynamic> item =
           data.firstWhere((element) => element['講義コード'] == id);
-      if (item["学期"] == '後集中') {
-        intensiveClasses.add(item["科目名"]);
+      if (item['学期'] == '後集中') {
+        intensiveClassNames.add(item['科目名']);
       }
     }
   }
@@ -274,8 +285,9 @@ class _MyHomePageState extends State<MyHomePage> {
       Map<String, dynamic> item =
           data.firstWhere((element) => element['講義コード'] == id);
       for (int i = 0; i < categories.length - 1; i++) {
-        if (item["分類"].contains(categories[i])) {
-          tookCredits[i] += int.parse(item["単位数"].toString());
+        if (item['分類'].contains(categories[i])) {
+          //tookCredits[i] += int.parse(item['単位数'].toString());
+          tookCredits[i] += item['単位数'];
         }
       }
     }
@@ -319,7 +331,7 @@ class _MyHomePageState extends State<MyHomePage> {
         });
   }
 
-  Table timeTable(String title, List<List<String>> data) {
+  Table timeTable(String title, List<List<String>> nameData, bool isFormer) {
     return Table(
       defaultVerticalAlignment: TableCellVerticalAlignment.middle,
       border: TableBorder.all(
@@ -346,29 +358,73 @@ class _MyHomePageState extends State<MyHomePage> {
             children: [
               TableCell(
                   child: Text(
-                "${i + 1}限",
+                '${i + 1}限',
                 textAlign: TextAlign.center,
               )),
               for (int j = 0; j < weekdays.length; j++)
                 TableCell(
-                  child: (data[i][j] == '')
+                  child: (nameData[i][j] == '')
                       ? Container(
                           margin: const EdgeInsets.all(5),
                           height: 50,
                         )
-                      : Container(
-                          margin: const EdgeInsets.all(5),
-                          height: 50,
-                          decoration: BoxDecoration(
-                              color: (data[i][j].trimRight().contains('\n'))
-                                  ? Colors.red.withAlpha(64)
-                                  : Colors.lightBlue.withAlpha(64),
-                              borderRadius:
-                                  const BorderRadius.all(Radius.circular(15))),
-                          child: FittedBox(
-                            fit: BoxFit.scaleDown,
+                      : InkWell(
+                          onTap: () {
+                            Map<String, dynamic> item = data.firstWhere(
+                                (element) => isFormer
+                                    ? element['講義コード'] == formerClasses[i][j]
+                                    : element['講義コード'] == latterClasses[i][j]);
+                            String info =
+                                (item['クラス'] + ' ' + item['備考']).trim();
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return (nameData[i][j]
+                                        .trimRight()
+                                        .contains('\n'))
+                                    ? AlertDialog(
+                                        title: const Text('科目が重複しています'),
+                                        content: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.start,
+                                          children: [
+                                            Text(nameData[i][j]),
+                                          ],
+                                        ),
+                                        scrollable: true,
+                                      )
+                                    : AlertDialog(
+                                        title: (info == '')
+                                            ? Text(item['科目名'])
+                                            : Text('($info) ${item['科目名']}'),
+                                        content: SelectionArea(
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                  '講義コード\n${item['講義コード']}\n\n教室\n${item['教室']}\n\n担当者\n${item['担当者']}'),
+                                            ],
+                                          ),
+                                        ),
+                                        scrollable: true,
+                                      );
+                              },
+                            );
+                          },
+                          child: Container(
+                            alignment: Alignment.center,
+                            margin: const EdgeInsets.all(5),
+                            height: 50,
+                            decoration: BoxDecoration(
+                                color:
+                                    (nameData[i][j].trimRight().contains('\n'))
+                                        ? Colors.red.withAlpha(64)
+                                        : Colors.lightBlue.withAlpha(64),
+                                borderRadius: const BorderRadius.all(
+                                    Radius.circular(15))),
                             child: Text(
-                              data[i][j].trimRight(),
+                              nameData[i][j].trimRight(),
                               textAlign: TextAlign.center,
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
@@ -946,23 +1002,25 @@ class _MyHomePageState extends State<MyHomePage> {
                         (ratio < 1)
                             ? Column(
                                 children: [
-                                  timeTable('前半', formerClasses),
+                                  timeTable('前半', formerClassNames, true),
                                   const SizedBox(
                                     height: 20,
                                   ),
-                                  timeTable('後半', latterClasses),
+                                  timeTable('後半', latterClassNames, false),
                                 ],
                               )
                             : Row(
                                 children: [
                                   Expanded(
-                                    child: timeTable('前半', formerClasses),
+                                    child:
+                                        timeTable('前半', formerClassNames, true),
                                   ),
                                   const SizedBox(
                                     width: 20,
                                   ),
                                   Expanded(
-                                    child: timeTable('後半', latterClasses),
+                                    child: timeTable(
+                                        '後半', latterClassNames, false),
                                   ),
                                 ],
                               ),
@@ -982,14 +1040,14 @@ class _MyHomePageState extends State<MyHomePage> {
                             const TableRow(children: [
                               TableCell(
                                   child: Text(
-                                "集中",
+                                '集中',
                                 textAlign: TextAlign.center,
                               )),
                             ]),
                             TableRow(
                               children: [
                                 TableCell(
-                                  child: (intensiveClasses.isEmpty)
+                                  child: (intensiveClassNames.isEmpty)
                                       ? Container(
                                           margin: const EdgeInsets.all(5),
                                           height: 50,
@@ -999,7 +1057,9 @@ class _MyHomePageState extends State<MyHomePage> {
                                           child: Row(
                                             children: [
                                               for (int i = 0;
-                                                  i < intensiveClasses.length;
+                                                  i <
+                                                      intensiveClassNames
+                                                          .length;
                                                   i++)
                                                 Container(
                                                   margin:
@@ -1015,7 +1075,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                                                   15))),
                                                   child: Center(
                                                     child: Text(
-                                                      intensiveClasses[i],
+                                                      intensiveClassNames[i],
                                                     ),
                                                   ),
                                                 ),
