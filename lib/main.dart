@@ -470,7 +470,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 ? Colors.grey[800]
                 : Colors.white,
             title: const Text(
-              'TCU-TiE ver.2023/8/3',
+              'TCU-TiE ver.2023/9/21',
               style: TextStyle(
                 color: Colors.lightBlue,
                 fontSize: 18,
@@ -728,9 +728,11 @@ class _MyHomePageState extends State<MyHomePage> {
                                     context: context,
                                     builder: (BuildContext context) {
                                       return AlertDialog(
-                                        title: (info == '')
-                                            ? Text(item['科目名'])
-                                            : Text('($info) ${item['科目名']}'),
+                                        title: SelectionArea(
+                                          child: (info == '')
+                                              ? Text(item['科目名'])
+                                              : Text('($info) ${item['科目名']}'),
+                                        ),
                                         content: SelectionArea(
                                           child: Row(
                                             mainAxisAlignment:
@@ -1098,11 +1100,13 @@ class _MyHomePageState extends State<MyHomePage> {
                                                       builder: (BuildContext
                                                           context) {
                                                         return AlertDialog(
-                                                          title: (info == '')
-                                                              ? Text(
-                                                                  item['科目名'])
-                                                              : Text(
-                                                                  '($info) ${item['科目名']}'),
+                                                          title: SelectionArea(
+                                                            child: (info == '')
+                                                                ? Text(
+                                                                    item['科目名'])
+                                                                : Text(
+                                                                    '($info) ${item['科目名']}'),
+                                                          ),
                                                           content:
                                                               SelectionArea(
                                                             child: Row(
