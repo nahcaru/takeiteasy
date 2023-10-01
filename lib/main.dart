@@ -470,7 +470,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 ? Colors.grey[800]
                 : Colors.white,
             title: const Text(
-              'TCU-TiE ver.2023/9/21',
+              'TCU-TiE ver.2023/9/27',
               style: TextStyle(
                 color: Colors.lightBlue,
                 fontSize: 18,
