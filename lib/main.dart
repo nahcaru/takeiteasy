@@ -231,10 +231,6 @@ class _MyHomePageState extends State<MyHomePage> {
   void setTable() {
     formerClassNames = [];
     latterClassNames = [];
-    /*
-    formerClasses = List.filled(times.length, List.filled(weekdays.length, ''));
-    latterClasses = List.filled(times.length, List.filled(weekdays.length, ''));
-    */
     formerClasses = [];
     latterClasses = [];
     for (int i = 0; i < times.length; i++) {
@@ -255,10 +251,6 @@ class _MyHomePageState extends State<MyHomePage> {
               case '後期':
                 formerNamesCell += '${item['科目名']}\n';
                 latterNamesCell += '${item['科目名']}\n';
-                /*
-                formerClasses[i][j] = item['講義コード'];
-                latterClasses[i][j] = item['講義コード'];
-                */
                 formerCell = item['講義コード'];
                 latterCell = item['講義コード'];
                 break;
@@ -470,7 +462,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 ? Colors.grey[800]
                 : Colors.white,
             title: const Text(
-              'TCU-TiE ver.2023/11/17',
+              'TCU-TiE ver.2023/11/21',
               style: TextStyle(
                 color: Colors.lightBlue,
                 fontSize: 18,
