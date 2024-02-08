@@ -1,5 +1,3 @@
-//import 'dart:ffi';
-
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -38,7 +36,7 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'TCU Take it Easier (Unofficial)',
+      title: 'Take it Easy (Unofficial)',
       theme: ThemeData(
         primarySwatch: Colors.lightBlue,
         textTheme: GoogleFonts.mPlus1pTextTheme(
@@ -55,7 +53,7 @@ class _MyAppState extends State<MyApp> {
       themeMode: _themeMode,
       debugShowCheckedModeBanner: false,
       home: MyHomePage(
-        title: 'Take it Easier (Unofficial)',
+        title: 'Take it Easy (Unofficial)',
         onToggleTheme: _toggleTheme,
       ),
     );
