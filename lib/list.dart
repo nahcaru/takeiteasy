@@ -1,0 +1,495 @@
+import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart' hide Filter;
+import 'package:url_launcher/url_launcher.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/services.dart';
+import 'dart:convert';
+import 'filter.dart';
+import 'card.dart';
+
+void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  runApp(const MaterialApp(
+    home: ListPage(),
+  ));
+}
+
+class ListPage extends StatefulWidget {
+  const ListPage({super.key});
+  @override
+  State<ListPage> createState() => _ListPageState();
+}
+
+class _ListPageState extends State<ListPage> {
+  final TextEditingController _searchController = TextEditingController();
+  List<Map<String, dynamic>> data = [];
+  List<Map<String, dynamic>> filtered = [];
+  List<String> tookClasses = [];
+  final List<String> departments = ['共通', '情科', '知能'];
+  late Filter departmentFilter = Filter(items: departments);
+  final List<String> grades = ['1', '2', '3', '4'];
+  final List<String> terms = ['後期前', '後期後', '後期', '後集中', '通年'];
+  final List<String> categories = [
+    '教養',
+    '体育',
+    '外国語',
+    'PBL',
+    '情報工学基盤',
+    '専門',
+    '教職',
+    'その他'
+  ];
+  final List<String> compulsories = ['必修', '選択必修', '選択'];
+  final String urlString =
+      'https://websrv.tcu.ac.jp/tcu_web_v3/slbssbdr.do?value%28risyunen%29=2023&value%28semekikn%29=1&value%28kougicd%29=';
+
+  @override
+  void initState() {
+    super.initState();
+    loadData();
+    _searchController.addListener(filterData);
+  }
+
+  @override
+  void dispose() {
+    _searchController.removeListener(filterData);
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void loadData() async {
+    String jsonText = await rootBundle.loadString('assets/data.json');
+    List<dynamic> jsonData = json.decode(jsonText);
+    data = jsonData.cast<Map<String, dynamic>>().toList();
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      try {
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .get()
+            .then((ref) {
+          List<dynamic> userData = ref.get('tookClasses');
+          tookClasses = userData.map((element) => element.toString()).toList();
+        });
+      } catch (error) {
+        //print(error);
+      }
+    }
+    setState(() {
+      filtered = data;
+    });
+  }
+
+  void filterData() {
+    filtered = data.where((item) {
+      if (departmentFilter.isItemSelected(item['学科']) != true) {
+        return false;
+      }
+      /*
+      if (areGradesSelected[grades.indexOf(item['年'].toString())] != true) {
+        return false;
+      }
+      if (item['学期'] != '') {
+        if (areTermsSelected[terms.indexOf(item['学期'])] != true) {
+          return false;
+        }
+      }
+      bool matched = false;
+      for (int i = 0; i < categories.length - 1; i++) {
+        if (item['分類'].toString().contains(categories[i])) {
+          matched = true;
+          if (!areCategoriesSelected[i]) {
+            return false;
+          }
+        }
+      }
+      if (!areCategoriesSelected.last) {
+        if (!matched) {
+          return false;
+        }
+      }
+
+      matched = false;
+      for (int i = compulsories.length - 2; 0 <= i; i--) {
+        if (item['分類'].toString().contains(compulsories[i])) {
+          matched = true;
+          if (!areCompulsoriesSelected[i]) {
+            return false;
+          }
+        }
+      }
+      if (!areCompulsoriesSelected.last) {
+        if (!matched) {
+          return false;
+        }
+      }
+
+      if (!item['科目名']
+          .toLowerCase()
+          .toString()
+          .contains(_searchController.text.toLowerCase())) {
+        return false;
+      }*/
+      return true;
+    }).toList();
+    setState(() {});
+  }
+
+  Padding searchBox() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 5),
+      child: SizedBox(
+        width: 300,
+        child: TextField(
+          textAlignVertical: TextAlignVertical.center,
+          controller: _searchController,
+          decoration: InputDecoration(
+              isDense: true,
+              isCollapsed: true,
+              hintText: '検索',
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              prefixIcon: const Icon(Icons.search)),
+        ),
+      ),
+    );
+  }
+
+  Row filters() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const SizedBox(
+          width: 20,
+        ),
+        const Text('学科'),
+        FilterButton(filter: departmentFilter),
+        /*
+        const SizedBox(
+          width: 5,
+        ),
+        const Text('学年'),
+        filterButton(grades, areGradesSelected),
+        const SizedBox(
+          width: 5,
+        ),
+        const Text('学期'),
+        filterButton(terms, areTermsSelected),
+        const SizedBox(
+          width: 5,
+        ),
+        const Text('分類'),
+        filterButton(categories, areCategoriesSelected),
+        const SizedBox(
+          width: 5,
+        ),
+        const Text('必選'),
+        filterButton(compulsories, areCompulsoriesSelected),*/
+      ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    var screenSize = MediaQuery.of(context).size;
+    double ratio = (screenSize.width / screenSize.height);
+    return Row(
+      children: [
+        Expanded(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              (ratio < 1)
+                  ? Column(children: [
+                      //searchBox(),
+                      SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: filters(),
+                      ),
+                    ])
+                  : Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        //searchBox(),
+                        filters(),
+                      ],
+                    ),
+              const Divider(
+                height: 0,
+              ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: ListView.builder(
+                    itemCount: filtered.length,
+                    itemBuilder: (context, index) {
+                      Map<String, dynamic> item = filtered[index];
+                      String info = (item['クラス'] + ' ' + item['備考']).trim();
+                      return InkWell(
+                        onTap: () {
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                title: SelectionArea(
+                                  child: (info == '')
+                                      ? Text(item['科目名'])
+                                      : Text('($info) ${item['科目名']}'),
+                                ),
+                                content: SelectionArea(
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                          '講義コード\n${item['講義コード']}\n\n教室\n${item['教室']}\n\n担当者\n${item['担当者']}'),
+                                    ],
+                                  ),
+                                ),
+                                scrollable: true,
+                              );
+                            },
+                          );
+                        },
+                        child: Card(
+                          child: Container(
+                            padding: const EdgeInsets.all(5),
+                            child: Column(
+                              children: [
+                                if (ratio < 1)
+                                  DefaultTextStyle.merge(
+                                    style: const TextStyle(fontSize: 12),
+                                    child: Row(
+                                      children: [
+                                        const SizedBox(
+                                          width: 5,
+                                        ),
+                                        Text(item['学科']),
+                                        const SizedBox(
+                                          width: 5,
+                                        ),
+                                        Text('${item['年']}年'),
+                                        const SizedBox(
+                                          width: 5,
+                                        ),
+                                        Text(item['学期']),
+                                        const SizedBox(
+                                          width: 5,
+                                        ),
+                                        Text(item['時限']),
+                                        const SizedBox(
+                                          width: 5,
+                                        ),
+                                        if (info != '')
+                                          FittedBox(
+                                            fit: BoxFit.scaleDown,
+                                            child: Text(
+                                              info,
+                                            ),
+                                          ),
+                                      ],
+                                    ),
+                                  ),
+                                Row(
+                                  children: [
+                                    tookClasses.contains(item['講義コード'])
+                                        ? IconButton(
+                                            icon: Icon(Icons.library_add_check,
+                                                color: Theme.of(context)
+                                                            .brightness ==
+                                                        Brightness.dark
+                                                    ? Colors.white
+                                                    : Colors.black),
+                                            onPressed: () async {
+                                              setState(() {
+                                                tookClasses
+                                                    .remove(item['講義コード']);
+                                              });
+                                              User? user = FirebaseAuth
+                                                  .instance.currentUser;
+                                              if (user != null) {
+                                                await FirebaseFirestore.instance
+                                                    .collection('users')
+                                                    .doc(user.uid)
+                                                    .set({
+                                                  'tookClasses': tookClasses
+                                                });
+                                              }
+                                            },
+                                          )
+                                        : IconButton(
+                                            icon: const Icon(
+                                                Icons.library_add_outlined,
+                                                color: Colors.blueAccent),
+                                            onPressed: () async {
+                                              setState(() {
+                                                tookClasses.add(item['講義コード']);
+                                              });
+                                              User? user = FirebaseAuth
+                                                  .instance.currentUser;
+                                              if (user != null) {
+                                                await FirebaseFirestore.instance
+                                                    .collection('users')
+                                                    .doc(user.uid)
+                                                    .set({
+                                                  'tookClasses': tookClasses
+                                                });
+                                              }
+                                            },
+                                          ),
+                                    if (1 <= ratio)
+                                      Expanded(
+                                        flex: 1,
+                                        child: Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            Text(item['学科']),
+                                            Text('${item['年']}年'),
+                                          ],
+                                        ),
+                                      ),
+                                    if (1 <= ratio)
+                                      Expanded(
+                                        flex: 3,
+                                        child: Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            Text(item['学期']),
+                                            Text(item['時限']),
+                                          ],
+                                        ),
+                                      ),
+                                    Expanded(
+                                      flex: 8,
+                                      child: (ratio < 1)
+                                          ? FittedBox(
+                                              fit: BoxFit.scaleDown,
+                                              alignment: Alignment.centerLeft,
+                                              child: Text.rich(TextSpan(
+                                                text: item['科目名'],
+                                                style: const TextStyle(
+                                                  color: Colors.blueAccent,
+                                                  fontSize: 18,
+                                                ),
+                                                recognizer:
+                                                    TapGestureRecognizer()
+                                                      ..onTap = () {
+                                                        launchUrl(Uri.parse(
+                                                            urlString +
+                                                                item['講義コード']));
+                                                      },
+                                              )),
+                                            )
+                                          : Column(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                if (info != '')
+                                                  FittedBox(
+                                                    fit: BoxFit.scaleDown,
+                                                    child: Text(
+                                                      info,
+                                                      style: const TextStyle(
+                                                        fontSize: 12,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                Text.rich(TextSpan(
+                                                  text: item['科目名'],
+                                                  style: const TextStyle(
+                                                    color: Colors.blueAccent,
+                                                    fontSize: 18,
+                                                  ),
+                                                  recognizer:
+                                                      TapGestureRecognizer()
+                                                        ..onTap = () {
+                                                          launchUrl(Uri.parse(
+                                                              urlString +
+                                                                  item[
+                                                                      '講義コード']));
+                                                        },
+                                                )),
+                                                if (item['受講対象/再履修者科目名'] != '')
+                                                  FittedBox(
+                                                    fit: BoxFit.scaleDown,
+                                                    child: Text(
+                                                      item['受講対象/再履修者科目名'],
+                                                      style: const TextStyle(
+                                                        fontSize: 12,
+                                                      ),
+                                                    ),
+                                                  ),
+                                              ],
+                                            ),
+                                    ),
+                                    Expanded(
+                                      flex: 4,
+                                      child: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          FittedBox(
+                                            fit: BoxFit.scaleDown,
+                                            child: Text(
+                                              item['分類'] + ' ',
+                                            ),
+                                          ),
+                                          Text('${item['単位数']}単位'),
+                                        ],
+                                      ),
+                                    ),
+                                    if (1 <= ratio)
+                                      Expanded(
+                                          flex: 12,
+                                          child: Text(
+                                            item['概要'],
+                                            overflow: TextOverflow.ellipsis,
+                                            maxLines: 4,
+                                            style: const TextStyle(
+                                              fontSize: 10,
+                                            ),
+                                          )),
+                                  ],
+                                ),
+                                if (ratio < 1 && item['受講対象/再履修者科目名'] != '')
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: FittedBox(
+                                          fit: BoxFit.scaleDown,
+                                          alignment: Alignment.centerLeft,
+                                          child: Padding(
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 5),
+                                            child: Text(
+                                              item['受講対象/再履修者科目名'],
+                                              style:
+                                                  const TextStyle(fontSize: 12),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
