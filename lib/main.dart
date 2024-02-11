@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:convert';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart' hide EmailAuthProvider;
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:async' show Future;
+import 'package:flutter/services.dart' show rootBundle;
 
 import 'firebase_options.dart';
 import 'list.dart';
 import 'table.dart';
+import 'course.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -93,66 +95,40 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int currentPageIndex = 0;
-  List<Map<String, dynamic>> data = [];
-  List<Map<String, dynamic>> filtered = [];
-  List<String> tookClasses = [];
-  List<double> tookCredits = [];
-  List<String> weekdays = ['月', '火', '水', '木', '金', '土'];
-  List<String> times = ['1', '2', '3', '4', '5', '6'];
-  List<List<String>> formerClassNames = [];
-  List<List<String>> latterClassNames = [];
-  List<String> intensiveClassNames = [];
-  List<List<String>> formerClasses = [];
-  List<List<String>> latterClasses = [];
-  List<String> intensiveClasses = [];
-  List<bool> areDepartmentsSelected = [];
-  final List<String> departments = ['共通', '情科', '知能'];
-  List<bool> areGradesSelected = [];
-  final List<String> grades = ['1', '2', '3', '4'];
-  List<bool> areTermsSelected = [];
-  final List<String> terms = ['後期前', '後期後', '後期', '後集中', '通年'];
-  List<bool> areCategoriesSelected = [];
-  final List<String> categories = [
-    '教養',
-    '体育',
-    '外国語',
-    'PBL',
-    '情報工学基盤',
-    '専門',
-    '教職',
-    'その他'
-  ];
-  List<bool> areCompulsoriesSelected = [];
-  final List<String> compulsories = ['必修', '選択必修', '選択'];
+  List<Course> courseList = [];
 
   @override
   void initState() {
     super.initState();
-    loadData();
+    loadAsset();
+  }
+
+  Future<void> loadAsset() async {
+    String jsonText = await rootBundle.loadString('assets/data.json');
+    List<dynamic> jsonData = json.decode(jsonText);
+    List<Map<String, dynamic>> data =
+        jsonData.cast<Map<String, dynamic>>().toList();
+    for (var element in data) {
+      courseList.add(Course.fromJson(element));
+    }
   }
 
   void loadData() async {
-    String jsonText = await rootBundle.loadString('assets/data.json');
-    List<dynamic> jsonData = json.decode(jsonText);
-    data = jsonData.cast<Map<String, dynamic>>().toList();
-    User? user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      try {
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(user.uid)
-            .get()
-            .then((ref) {
-          List<dynamic> userData = ref.get('tookClasses');
-          tookClasses = userData.map((element) => element.toString()).toList();
-        });
-      } catch (error) {
-        //print(error);
-      }
-    }
-    setState(() {
-      filtered = data;
-    });
+    // User? user = FirebaseAuth.instance.currentUser;
+    // if (user != null) {
+    //   try {
+    //     await FirebaseFirestore.instance
+    //         .collection('users')
+    //         .doc(user.uid)
+    //         .get()
+    //         .then((ref) {
+    //       List<dynamic> userData = ref.get('tookClasses');
+    //       //tookClasses = userData.map((element) => element.toString()).toList();
+    //     });
+    //   } catch (error) {
+    //     //print(error);
+    //   }
+    // }
   }
 
   @override
@@ -167,9 +143,9 @@ class _MyHomePageState extends State<MyHomePage> {
             backgroundColor: Theme.of(context).brightness == Brightness.dark
                 ? Colors.grey[800]
                 : Colors.white,
-            title: const Text(
-              'TCU-TiE ver.2023/11/21',
-              style: TextStyle(
+            title: Text(
+              widget.title,
+              style: const TextStyle(
                 color: Colors.lightBlue,
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -190,8 +166,6 @@ class _MyHomePageState extends State<MyHomePage> {
                           child: NavigationBar(
                             onDestinationSelected: (int index) {
                               setState(() {
-                                //setTable();
-                                //setCredit();
                                 currentPageIndex = index;
                               });
                             },
@@ -269,8 +243,6 @@ class _MyHomePageState extends State<MyHomePage> {
               ? NavigationBar(
                   onDestinationSelected: (int index) {
                     setState(() {
-                      //setTable();
-                      //setCredit();
                       currentPageIndex = index;
                     });
                   },
@@ -290,8 +262,9 @@ class _MyHomePageState extends State<MyHomePage> {
                   height: 0,
                 ),
           body: [
-            ListPage(),
-            TablePage(),
+            ListPage(courseList: courseList),
+            Placeholder()
+            //TablePage(),
           ][currentPageIndex]),
     );
   }
