@@ -1,9 +1,7 @@
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart' hide Filter;
 import 'package:url_launcher/url_launcher.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/services.dart';
 import 'filter.dart';
 import 'card.dart';
 import 'course.dart';
@@ -17,27 +15,40 @@ class ListPage extends StatefulWidget {
 
 class _ListPageState extends State<ListPage> {
   final TextEditingController _searchController = TextEditingController();
-  List<Map<String, dynamic>> data = [];
-  List<Map<String, dynamic>> filtered = [];
   List<String> tookClasses = [];
   final List<Option> departments = [
     Option(name: '共通'),
     Option(name: '情科'),
     Option(name: '知能'),
   ];
-  final List<String> grades = ['1', '2', '3', '4'];
-  final List<String> terms = ['後期前', '後期後', '後期', '後集中', '通年'];
-  final List<String> categories = [
-    '教養',
-    '体育',
-    '外国語',
-    'PBL',
-    '情報工学基盤',
-    '専門',
-    '教職',
-    'その他'
+  final List<Option> grades = [
+    Option(name: '1'),
+    Option(name: '2'),
+    Option(name: '3'),
+    Option(name: '4')
   ];
-  final List<String> compulsories = ['必修', '選択必修', '選択'];
+  final List<Option> terms = [
+    Option(name: '後期前'),
+    Option(name: '後期後'),
+    Option(name: '後期'),
+    Option(name: '後集中'),
+    Option(name: '通年')
+  ];
+  final List<Option> categories = [
+    Option(name: '教養'),
+    Option(name: '体育'),
+    Option(name: '外国語'),
+    Option(name: 'PBL'),
+    Option(name: '情報工学基盤'),
+    Option(name: '専門'),
+    Option(name: '教職'),
+    Option(name: 'その他')
+  ];
+  final List<Option> compulsories = [
+    Option(name: '必修'),
+    Option(name: '選択必修'),
+    Option(name: '選択')
+  ];
   final String urlString =
       'https://websrv.tcu.ac.jp/tcu_web_v3/slbssbdr.do?value%28risyunen%29=2023&value%28semekikn%29=1&value%28kougicd%29=';
 
@@ -137,38 +148,57 @@ class _ListPageState extends State<ListPage> {
           width: 20,
         ),
         const Text('学科'),
-        SizedBox(
-          width: 20,
-          child: FilterButton(
-              options: departments,
-              onChanged: (bool? value) {
-                setState(() {
-                  //filterData();
-                });
-              }),
-        )
-        //FilterButton(filter: departmentFilter),
-        /*
+        FilterButton(
+            options: departments,
+            onChanged: (bool? value) {
+              setState(() {
+                //filterData();
+              });
+            }),
         const SizedBox(
           width: 5,
         ),
         const Text('学年'),
-        filterButton(grades, areGradesSelected),
+        FilterButton(
+            options: grades,
+            onChanged: (bool? value) {
+              setState(() {
+                //filterData();
+              });
+            }),
         const SizedBox(
           width: 5,
         ),
         const Text('学期'),
-        filterButton(terms, areTermsSelected),
+        FilterButton(
+            options: terms,
+            onChanged: (bool? value) {
+              setState(() {
+                //filterData();
+              });
+            }),
         const SizedBox(
           width: 5,
         ),
         const Text('分類'),
-        filterButton(categories, areCategoriesSelected),
+        FilterButton(
+            options: categories,
+            onChanged: (bool? value) {
+              setState(() {
+                //filterData();
+              });
+            }),
         const SizedBox(
           width: 5,
         ),
         const Text('必選'),
-        filterButton(compulsories, areCompulsoriesSelected),*/
+        FilterButton(
+            options: compulsories,
+            onChanged: (bool? value) {
+              setState(() {
+                //filterData();
+              });
+            }),
       ],
     );
   }
@@ -185,7 +215,7 @@ class _ListPageState extends State<ListPage> {
             children: [
               (ratio < 1)
                   ? Column(children: [
-                      //searchBox(),
+                      searchBox(),
                       SingleChildScrollView(
                         scrollDirection: Axis.horizontal,
                         child: filters(),
@@ -194,7 +224,7 @@ class _ListPageState extends State<ListPage> {
                   : Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        //searchBox(),
+                        searchBox(),
                         filters(),
                       ],
                     ),

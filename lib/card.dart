@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
 import 'course.dart';
 
 class CourseCard extends StatefulWidget {
@@ -16,7 +17,7 @@ class CourseCardState extends State<CourseCard> {
       child: ListTile(
         title: Text(widget.course.name),
         subtitle: Text(widget.course.category),
-        trailing: Icon(Icons.more_vert),
+        trailing: const Icon(Icons.more_vert),
       ),
     );
   }

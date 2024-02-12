@@ -32,7 +32,12 @@ class FilterButtonState extends State<FilterButton> {
                   controlAffinity: ListTileControlAffinity.leading,
                   title: Text(name),
                   value: entry.value.value,
-                  onChanged: widget.onChanged,
+                  onChanged: (bool? value) {
+                    setState(() {
+                      entry.value.value = value!;
+                      widget.onChanged(value);
+                    });
+                  },
                 );
               }),
             );

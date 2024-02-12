@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 class TablePage extends StatefulWidget {
+  const TablePage({super.key});
+
   @override
   _TablePageState createState() => _TablePageState();
 }
