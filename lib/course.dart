@@ -1,6 +1,7 @@
 class Course {
   String name;
   String code;
+  String department;
   String classs;
   String teacher;
   String room;
@@ -17,6 +18,7 @@ class Course {
   Course.fromJson(Map<String, dynamic> json)
       : name = json['科目名'],
         code = json['講義コード'],
+        department = json['学科'],
         classs = json['クラス'],
         teacher = json['担当者'],
         room = json['教室'],
