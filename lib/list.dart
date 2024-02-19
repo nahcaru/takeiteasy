@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart' hide Filter;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'filter.dart';
-import 'dropdown.dart';
+//import 'dropdown.dart';
 import 'card.dart';
 import 'course.dart';
 
@@ -14,7 +14,7 @@ class ListPage extends StatefulWidget {
 }
 
 class _ListPageState extends State<ListPage> {
-  List<String> tookClasses = [];
+  String? crclumcd;
   final List<ChoiceOption> curriculums = [
     ChoiceOption(name: '情科21(一般)', code: 's21210'),
     ChoiceOption(name: '情科21(国際)', code: 's21211'),
@@ -61,8 +61,6 @@ class _ListPageState extends State<ListPage> {
     FilterOption(name: '選択必修'),
     FilterOption(name: '選択')
   ];
-  final String urlString =
-      'https://websrv.tcu.ac.jp/tcu_web_v3/slbssbdr.do?value%28risyunen%29=2023&value%28semekikn%29=1&value%28kougicd%29=';
 
   @override
   void initState() {
@@ -211,7 +209,11 @@ class _ListPageState extends State<ListPage> {
           flexibleSpace: FlexibleSpaceBar(
             background: portrait
                 ? Column(children: [
-                    ChoiceBox(options: curriculums, onSelected: (code) {}),
+                    ChoiceBox(
+                        options: curriculums,
+                        onSelected: (code) => setState(() {
+                              crclumcd = code;
+                            })),
                     const SizedBox(
                       height: 10,
                     ),
@@ -236,7 +238,10 @@ class _ListPageState extends State<ListPage> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             ChoiceBox(
-                                options: curriculums, onSelected: (code) {}),
+                                options: curriculums,
+                                onSelected: (code) => setState(() {
+                                      crclumcd = code;
+                                    })),
                             const SizedBox(
                               width: 20,
                             ),
@@ -258,7 +263,10 @@ class _ListPageState extends State<ListPage> {
           delegate: SliverChildBuilderDelegate(
             (BuildContext context, int index) => Padding(
               padding: const EdgeInsets.symmetric(horizontal: 10),
-              child: CourseCard(course: filtered()[index]),
+              child: CourseCard(
+                course: filtered()[index],
+                crclumcd: crclumcd,
+              ),
             ),
             childCount: filtered().length,
           ),

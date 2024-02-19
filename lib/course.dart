@@ -30,15 +30,3 @@ class Course {
         target = json['受講対象/再履修者科目名'],
         about = json['概要'];
 }
-
-// class CourseList {
-//   List<Course> courses = [];
-
-//   void addCourse(Course course) {
-//     courses.add(course);
-//   }
-
-//   void removeCourse(Course course) {
-//     courses.remove(course);
-//   }
-// }

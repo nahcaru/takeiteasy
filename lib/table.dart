@@ -4,7 +4,7 @@ class TablePage extends StatefulWidget {
   const TablePage({super.key});
 
   @override
-  _TablePageState createState() => _TablePageState();
+  State<TablePage> createState() => _TablePageState();
 }
 
 class _TablePageState extends State<TablePage> {

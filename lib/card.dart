@@ -1,24 +1,41 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/gestures.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'course.dart';
 
-class CourseCard extends StatefulWidget {
-  @override
-  State<CourseCard> createState() => CourseCardState();
-  const CourseCard({Key? key, required this.course}) : super(key: key);
+class CourseCard extends StatelessWidget {
+  const CourseCard({super.key, required this.course, required this.crclumcd});
   final Course course;
-}
+  final String? crclumcd;
 
-class CourseCardState extends State<CourseCard> {
-  CourseCardState({Key? key});
+  Future<void> _launchUrl(Uri url) async {
+    if (!await launchUrl(
+      url,
+      mode: LaunchMode.inAppBrowserView,
+      webOnlyWindowName: '_blank',
+    )) {
+      throw Exception('Could not launch $url');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Card(
-      child: ListTile(
-        title: Text(widget.course.name),
-        subtitle: Text(widget.course.category),
-        trailing: const Icon(Icons.more_vert),
+      child: InkWell(
+        onTap: () => _launchUrl(Uri(
+            scheme: 'https',
+            host: 'websrv.tcu.ac.jp',
+            path: '/tcu_web_v3/slbssbdr.do',
+            queryParameters: {
+              'value(risyunen)': '2023',
+              'value(semekikn)': '1',
+              'value(kougicd)': course.code,
+              'value(crclumcd)': crclumcd,
+            })),
+        child: ListTile(
+          title: Text(course.name),
+          subtitle: Text(course.category),
+          trailing: const Icon(Icons.more_vert),
+        ),
       ),
     );
   }

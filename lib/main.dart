@@ -62,7 +62,7 @@ class _MyAppState extends State<MyApp> {
 }
 
 class AuthGate extends StatelessWidget {
-  const AuthGate({Key? key}) : super(key: key);
+  const AuthGate({super.key});
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<User?>(
@@ -82,7 +82,7 @@ class AuthGate extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key, required this.onToggleTheme}) : super(key: key);
+  const MyHomePage({super.key, required this.onToggleTheme});
   final void Function() onToggleTheme;
   @override
   State<MyHomePage> createState() => _MyHomePageState();

@@ -3,8 +3,7 @@ import 'course.dart';
 import 'dropdown.dart';
 
 class ChoiceBox extends StatelessWidget {
-  const ChoiceBox({Key? key, required this.options, required this.onSelected})
-      : super(key: key);
+  const ChoiceBox({super.key, required this.options, required this.onSelected});
   final List<ChoiceOption> options;
   final Function(String?) onSelected;
   @override
@@ -14,7 +13,9 @@ class ChoiceBox extends StatelessWidget {
       child: CustomDropdownMenu<String>(
         menuHeight: 300,
         enableFilter: true,
-        onSelected: (value) => onSelected(value) as void Function(String?),
+        onSelected: (value) {
+          onSelected(value);
+        },
         hintText: 'カリキュラム',
         inputDecorationTheme: const InputDecorationTheme(
           isDense: true,
@@ -38,7 +39,7 @@ class ChoiceOption {
 }
 
 class SearchBox extends StatelessWidget {
-  const SearchBox({Key? key, required this.options}) : super(key: key);
+  const SearchBox({super.key, required this.options});
   final List<Course> options;
   @override
   Widget build(BuildContext context) {
@@ -60,9 +61,7 @@ class SearchBox extends StatelessWidget {
               course.code.contains(controller.text)))
           .map((course) => ListTile(
                 title: Text(course.name),
-                onTap: () {
-                  controller.closeView(course.name);
-                },
+                onTap: () => controller.closeView(course.name),
               ))
           .toList(),
     );
@@ -70,8 +69,8 @@ class SearchBox extends StatelessWidget {
 }
 
 class FilterButton extends StatelessWidget {
-  const FilterButton({Key? key, required this.options, required this.onChanged})
-      : super(key: key);
+  const FilterButton(
+      {super.key, required this.options, required this.onChanged});
   final List<FilterOption> options;
   final Function(bool?) onChanged;
   @override
@@ -82,13 +81,8 @@ class FilterButton extends StatelessWidget {
               IconButton(
         tooltip: 'フィルター',
         icon: const Icon(Icons.filter_alt_outlined),
-        onPressed: () {
-          if (controller.isOpen) {
-            controller.close();
-          } else {
-            controller.open();
-          }
-        },
+        onPressed: () =>
+            controller.isOpen ? controller.close() : controller.open(),
       ),
       menuChildren: options
           .map((option) => CheckboxListTile(
