@@ -1,41 +1,35 @@
 import 'package:flutter/material.dart';
 import 'course.dart';
-import 'dropdown.dart';
 
 class ChoiceBox extends StatelessWidget {
   const ChoiceBox({super.key, required this.options, required this.onSelected});
-  final List<ChoiceOption> options;
-  final Function(String?) onSelected;
+  final List<Map<String, String>> options;
+  final void Function(String?)? onSelected;
   @override
   Widget build(BuildContext context) {
     return ButtonTheme(
       alignedDropdown: true,
-      child: CustomDropdownMenu<String>(
+      child: DropdownMenu<String>(
         menuHeight: 300,
-        enableFilter: true,
+        //enableFilter: true,
         onSelected: (value) {
-          onSelected(value);
+          onSelected?.call(value);
         },
         hintText: 'カリキュラム',
         inputDecorationTheme: const InputDecorationTheme(
           isDense: true,
           isCollapsed: true,
           border: OutlineInputBorder(),
+          constraints: BoxConstraints(maxHeight: 40),
           contentPadding: EdgeInsets.symmetric(horizontal: 8),
         ),
         dropdownMenuEntries: options
             .map((option) => DropdownMenuEntry<String>(
-                value: option.code, label: option.name))
+                value: option['code']!, label: option['name']!))
             .toList(),
       ),
     );
   }
-}
-
-class ChoiceOption {
-  String name;
-  String code;
-  ChoiceOption({required this.name, required this.code});
 }
 
 class SearchBox extends StatelessWidget {
@@ -69,10 +63,9 @@ class SearchBox extends StatelessWidget {
 }
 
 class FilterButton extends StatelessWidget {
-  const FilterButton(
-      {super.key, required this.options, required this.onChanged});
+  const FilterButton({super.key, required this.options, this.onChanged});
   final List<FilterOption> options;
-  final Function(bool?) onChanged;
+  final void Function(bool?)? onChanged;
   @override
   Widget build(BuildContext context) {
     return MenuAnchor(
@@ -91,7 +84,7 @@ class FilterButton extends StatelessWidget {
                 value: option.value,
                 onChanged: (bool? value) {
                   option.value = value!;
-                  onChanged(value) as void Function(bool?);
+                  onChanged?.call(value);
                 },
               ))
           .toList(),

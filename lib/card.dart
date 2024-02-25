@@ -2,11 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'course.dart';
 
-class CourseCard extends StatelessWidget {
+class CourseCard extends StatefulWidget {
   const CourseCard({super.key, required this.course, required this.crclumcd});
   final Course course;
   final String? crclumcd;
 
+  @override
+  State<CourseCard> createState() => _CourseCardState();
+}
+
+class _CourseCardState extends State<CourseCard> {
   Future<void> _launchUrl(Uri url) async {
     if (!await launchUrl(
       url,
@@ -28,14 +33,23 @@ class CourseCard extends StatelessWidget {
             queryParameters: {
               'value(risyunen)': '2023',
               'value(semekikn)': '1',
-              'value(kougicd)': course.code,
-              'value(crclumcd)': crclumcd,
+              'value(kougicd)': widget.course.code,
+              'value(crclumcd)': widget.crclumcd,
             })),
         child: ListTile(
-          title: Text(course.name),
-          subtitle: Text(course.category),
-          trailing: const Icon(Icons.more_vert),
-        ),
+            title: Text(widget.course.name),
+            subtitle: Text(widget.course.category[widget.crclumcd]!),
+            trailing: false
+                ? OutlinedButton.icon(
+                    onPressed: () {},
+                    icon: const Icon(Icons.playlist_add_check),
+                    label: const Text('取消'),
+                  )
+                : FilledButton.icon(
+                    onPressed: () {},
+                    icon: const Icon(Icons.playlist_add_outlined),
+                    label: const Text('登録'),
+                  )),
       ),
     );
   }

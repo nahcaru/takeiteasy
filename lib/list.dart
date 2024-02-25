@@ -1,38 +1,25 @@
+import 'package:flutter/services.dart' show rootBundle;
+import 'dart:async' show Future;
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart' hide Filter;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'filter.dart';
-//import 'dropdown.dart';
 import 'card.dart';
 import 'course.dart';
 
 class ListPage extends StatefulWidget {
-  const ListPage({super.key, required this.courseList});
+  //const ListPage({super.key, required this.courseList});
+  const ListPage({super.key, required this.crclumcd});
   @override
   State<ListPage> createState() => _ListPageState();
-  final List<Course> courseList;
+  final String? crclumcd;
 }
 
 class _ListPageState extends State<ListPage> {
+  Map<String, List<Course>> courses = {};
+  List<Course> filtered = [];
   String? crclumcd;
-  final List<ChoiceOption> curriculums = [
-    ChoiceOption(name: '情科21(一般)', code: 's21210'),
-    ChoiceOption(name: '情科21(国際)', code: 's21211'),
-    ChoiceOption(name: '情科22(一般)', code: 's22210'),
-    ChoiceOption(name: '情科22(国際)', code: 's22211'),
-    ChoiceOption(name: '情科23(一般)', code: 's23210'),
-    ChoiceOption(name: '情科23(国際)', code: 's23211'),
-    ChoiceOption(name: '情科24(一般)', code: 's24210'),
-    ChoiceOption(name: '情科24(国際)', code: 's24211'),
-    ChoiceOption(name: '知能21(一般)', code: 's21220'),
-    ChoiceOption(name: '知能21(国際)', code: 's21221'),
-    ChoiceOption(name: '知能22(一般)', code: 's22220'),
-    ChoiceOption(name: '知能22(国際)', code: 's22221'),
-    ChoiceOption(name: '知能23(一般)', code: 's23220'),
-    ChoiceOption(name: '知能23(国際)', code: 's23221'),
-    ChoiceOption(name: '知能24(一般)', code: 's24220'),
-    ChoiceOption(name: '知能24(国際)', code: 's24221'),
-  ];
   final List<FilterOption> grades = [
     FilterOption(name: '1'),
     FilterOption(name: '2'),
@@ -65,31 +52,64 @@ class _ListPageState extends State<ListPage> {
   @override
   void initState() {
     super.initState();
+    if (widget.crclumcd != null) {
+      crclumcd = widget.crclumcd;
+    }
+    loadJson();
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
-  List<Course> filtered() {
-    return widget.courseList.where((item) {
-      if (grades.firstWhere((element) {
-            return element.name == item.grade.toString();
-          }).value ==
-          false) {
-        return false;
+  Future<void> loadJson() async {
+    String jsonText = await rootBundle.loadString('assets/data.json');
+    Map<String, dynamic> jsonData = await json.decode(jsonText);
+    for (String key in jsonData.keys) {
+      courses[key] = [];
+      for (var element in jsonData[key]) {
+        courses[key]!.add(Course.fromJson(element));
       }
-      if (item.term != '') {
-        if (terms.firstWhere((element) {
-              return element.name == item.term;
-            }).value ==
-            false) {
-          return false;
+    }
+  }
+
+  void filterCourse() {
+    filtered = [];
+    Map<String, dynamic> codes = {
+      '情科': [
+        's21310',
+        's21311',
+        's22210',
+        's22211',
+        's23310',
+        's23311',
+        's24310',
+        's24311'
+      ],
+      '知能': [
+        's21320',
+        's21321',
+        's22220',
+        's22221',
+        's23320',
+        's23321',
+        's24320',
+        's24321'
+      ],
+    };
+
+    if (crclumcd != null) {
+      for (String key in codes.keys) {
+        if (codes[key]!.contains(crclumcd)) {
+          for (Course course in courses[key]!) {
+            if (course.target.any((target) => crclumcd!.startsWith(target))) {
+              filtered.add(course);
+            }
+          }
+          for (Course course in courses['共通']!) {
+            if (course.target.any((target) => crclumcd!.startsWith(target))) {
+              filtered.add(course);
+            }
+          }
         }
       }
-      return true;
-    }).toList();
+    }
   }
   // void filterData() {
   //   filtered = data.where((item) {
@@ -145,7 +165,35 @@ class _ListPageState extends State<ListPage> {
   //   setState(() {});
   // }
 
-  Row filters() {
+  ChoiceBox _choiceBox() {
+    return ChoiceBox(
+        options: const [
+          {'name': '情科21(一般)', 'code': 's21310'},
+          {'name': '情科21(国際)', 'code': 's21311'},
+          {'name': '情科22(一般)', 'code': 's22210'},
+          {'name': '情科22(国際)', 'code': 's22211'},
+          {'name': '情科23(一般)', 'code': 's23310'},
+          {'name': '情科23(国際)', 'code': 's23311'},
+          {'name': '情科24(一般)', 'code': 's24310'},
+          {'name': '情科24(国際)', 'code': 's24311'},
+          {'name': '知能21(一般)', 'code': 's21320'},
+          {'name': '知能21(国際)', 'code': 's21321'},
+          {'name': '知能22(一般)', 'code': 's22220'},
+          {'name': '知能22(国際)', 'code': 's22221'},
+          {'name': '知能23(一般)', 'code': 's23320'},
+          {'name': '知能23(国際)', 'code': 's23321'},
+          {'name': '知能24(一般)', 'code': 's24320'},
+          {'name': '知能24(国際)', 'code': 's24321'},
+        ],
+        onSelected: (code) {
+          setState(() {
+            crclumcd = code;
+          });
+          filterCourse();
+        });
+  }
+
+  Row _filters() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -153,9 +201,7 @@ class _ListPageState extends State<ListPage> {
         FilterButton(
             options: grades,
             onChanged: (bool? value) {
-              setState(() {
-                //filterData();
-              });
+              filterCourse();
             }),
         const SizedBox(
           width: 5,
@@ -164,9 +210,7 @@ class _ListPageState extends State<ListPage> {
         FilterButton(
             options: terms,
             onChanged: (bool? value) {
-              setState(() {
-                //filterData();
-              });
+              filterCourse();
             }),
         const SizedBox(
           width: 5,
@@ -175,9 +219,7 @@ class _ListPageState extends State<ListPage> {
         FilterButton(
             options: categories,
             onChanged: (bool? value) {
-              setState(() {
-                //filterData();
-              });
+              filterCourse();
             }),
         const SizedBox(
           width: 5,
@@ -186,9 +228,7 @@ class _ListPageState extends State<ListPage> {
         FilterButton(
             options: compulsories,
             onChanged: (bool? value) {
-              setState(() {
-                //filterData();
-              });
+              filterCourse();
             }),
       ],
     );
@@ -209,23 +249,19 @@ class _ListPageState extends State<ListPage> {
           flexibleSpace: FlexibleSpaceBar(
             background: portrait
                 ? Column(children: [
-                    ChoiceBox(
-                        options: curriculums,
-                        onSelected: (code) => setState(() {
-                              crclumcd = code;
-                            })),
+                    _choiceBox(),
                     const SizedBox(
                       height: 10,
                     ),
                     SearchBox(
-                      options: widget.courseList,
+                      options: filtered,
                     ),
                     const SizedBox(
                       height: 10,
                     ),
                     SingleChildScrollView(
                       scrollDirection: Axis.horizontal,
-                      child: filters(),
+                      child: _filters(),
                     ),
                   ])
                 : Align(
@@ -237,21 +273,17 @@ class _ListPageState extends State<ListPage> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            ChoiceBox(
-                                options: curriculums,
-                                onSelected: (code) => setState(() {
-                                      crclumcd = code;
-                                    })),
+                            _choiceBox(),
                             const SizedBox(
                               width: 20,
                             ),
                             SearchBox(
-                              options: widget.courseList,
+                              options: filtered,
                             ),
                             const SizedBox(
                               width: 20,
                             ),
-                            filters(),
+                            _filters(),
                           ],
                         ),
                       ),
@@ -264,11 +296,11 @@ class _ListPageState extends State<ListPage> {
             (BuildContext context, int index) => Padding(
               padding: const EdgeInsets.symmetric(horizontal: 10),
               child: CourseCard(
-                course: filtered()[index],
+                course: filtered[index],
                 crclumcd: crclumcd,
               ),
             ),
-            childCount: filtered().length,
+            childCount: filtered.length,
           ),
         ),
       ],

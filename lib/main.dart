@@ -1,7 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' show rootBundle;
-import 'dart:async' show Future;
-import 'dart:convert';
 import 'dart:ui';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -30,12 +27,6 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   ThemeMode _themeMode = ThemeMode.system;
-  void _toggleTheme() {
-    setState(() {
-      _themeMode =
-          _themeMode == ThemeMode.light ? ThemeMode.dark : ThemeMode.light;
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -54,8 +45,14 @@ class _MyAppState extends State<MyApp> {
       ),
       themeMode: _themeMode,
       debugShowCheckedModeBanner: false,
-      home: MyHomePage(
-        onToggleTheme: _toggleTheme,
+      home: HomePage(
+        onToggleTheme: () {
+          setState(() {
+            _themeMode = _themeMode == ThemeMode.light
+                ? ThemeMode.dark
+                : ThemeMode.light;
+          });
+        },
       ),
     );
   }
@@ -70,9 +67,11 @@ class AuthGate extends StatelessWidget {
       builder: (context, snapshot) {
         // User is not signed in
         if (!snapshot.hasData) {
-          return SignInScreen(providers: [
-            EmailAuthProvider(),
-          ]);
+          return MaterialApp(
+            home: SignInScreen(providers: [
+              EmailAuthProvider(),
+            ]),
+          );
         }
         // Render your application if authenticated
         return const MyApp();
@@ -81,37 +80,24 @@ class AuthGate extends StatelessWidget {
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.onToggleTheme});
+class HomePage extends StatefulWidget {
+  const HomePage({super.key, required this.onToggleTheme});
   final void Function() onToggleTheme;
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<HomePage> createState() => _HomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _HomePageState extends State<HomePage> {
   int currentPageIndex = 0;
   bool extended = false;
-  List<Course> courseList = [];
+  String? crclumcd;
 
   @override
   void initState() {
     super.initState();
-    loadAsset();
   }
 
-  Future<void> loadAsset() async {
-    String jsonText = await rootBundle.loadString('assets/data.json');
-    List<dynamic> jsonData = json.decode(jsonText);
-    List<Map<String, dynamic>> data =
-        jsonData.cast<Map<String, dynamic>>().toList();
-    setState(() {
-      for (var element in data) {
-        courseList.add(Course.fromJson(element));
-      }
-    });
-  }
-
-  void loadData() async {
+  void loadUserData() async {
     // User? user = FirebaseAuth.instance.currentUser;
     // if (user != null) {
     //   try {
@@ -228,31 +214,36 @@ class _MyHomePageState extends State<MyHomePage> {
                 },
                 extended: extended,
                 elevation: 1,
-                leading: NavigationRailExpanded(
-                  height: 44,
-                  child: Row(
-                    children: [
-                      const SizedBox(
-                        width: (80 - 31.689971923828125) / 2,
-                      ),
-                      Expanded(
-                        child: Align(
-                          alignment: Alignment.center,
-                          child: Text(
-                            extended ? 'Take it Easy' : 'TiE',
-                            maxLines: 1,
-                            overflow: TextOverflow.clip,
-                            style: TextStyle(
-                              color: Theme.of(context).colorScheme.primary,
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
+                leading: Column(
+                  children: [
+                    NavigationRailExpanded(
+                      height: 44,
+                      child: Row(
+                        children: [
+                          const SizedBox(
+                            width: (80 - 31.689971923828125) / 2,
+                          ),
+                          Expanded(
+                            child: Align(
+                              alignment: Alignment.center,
+                              child: Text(
+                                extended ? 'Take it Easy' : 'TiE',
+                                maxLines: 1,
+                                overflow: TextOverflow.clip,
+                                style: TextStyle(
+                                  color: Theme.of(context).colorScheme.primary,
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                             ),
                           ),
-                        ),
+                          const SizedBox(width: (80 - 31.689971923828125) / 2),
+                        ],
                       ),
-                      const SizedBox(width: (80 - 31.689971923828125) / 2),
-                    ],
-                  ),
+                    ),
+                    const NavigationRailExpanded(child: Divider()),
+                  ],
                 ),
                 destinations: const [
                   NavigationRailDestination(
@@ -316,10 +307,9 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ),
           Expanded(
-            child: [
-              ListPage(courseList: courseList),
-              const Placeholder()
-            ][currentPageIndex],
+            child: IndexedStack(
+                index: currentPageIndex,
+                children: [ListPage(crclumcd: crclumcd), const Placeholder()]),
           ),
         ],
       ),
