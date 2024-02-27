@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'course.dart';
+import 'user.dart';
+import 'dart:async' show Future;
 
 class CourseCard extends StatefulWidget {
-  const CourseCard({super.key, required this.course, required this.crclumcd});
+  const CourseCard({super.key, required this.course, required this.userData});
   final Course course;
-  final String? crclumcd;
+  final UserData userData;
 
   @override
   State<CourseCard> createState() => _CourseCardState();
@@ -34,22 +36,27 @@ class _CourseCardState extends State<CourseCard> {
               'value(risyunen)': '2023',
               'value(semekikn)': '1',
               'value(kougicd)': widget.course.code,
-              'value(crclumcd)': widget.crclumcd,
+              'value(crclumcd)': widget.userData.crclumcd,
             })),
         child: ListTile(
             title: Text(widget.course.name),
-            subtitle: Text(widget.course.category[widget.crclumcd]!),
-            trailing: false
-                ? OutlinedButton.icon(
-                    onPressed: () {},
-                    icon: const Icon(Icons.playlist_add_check),
-                    label: const Text('取消'),
-                  )
-                : FilledButton.icon(
-                    onPressed: () {},
-                    icon: const Icon(Icons.playlist_add_outlined),
-                    label: const Text('登録'),
-                  )),
+            subtitle: Text(widget.course.category[widget.userData.crclumcd]!),
+            trailing:
+                widget.userData.enrolledCourses.contains(widget.course.code)
+                    ? OutlinedButton.icon(
+                        onPressed: () => setState(() {
+                          widget.userData.removeCourse(widget.course.code);
+                        }),
+                        icon: const Icon(Icons.playlist_add_check),
+                        label: const Text('取消'),
+                      )
+                    : FilledButton.icon(
+                        onPressed: () => setState(() {
+                          widget.userData.addCourse(widget.course.code);
+                        }),
+                        icon: const Icon(Icons.playlist_add_outlined),
+                        label: const Text('登録'),
+                      )),
       ),
     );
   }

@@ -1,25 +1,23 @@
-import 'package:flutter/services.dart' show rootBundle;
 import 'dart:async' show Future;
 import 'dart:convert';
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart' hide Filter;
-import 'package:firebase_auth/firebase_auth.dart';
+import 'user.dart';
 import 'filter.dart';
 import 'card.dart';
 import 'course.dart';
 
 class ListPage extends StatefulWidget {
   //const ListPage({super.key, required this.courseList});
-  const ListPage({super.key, required this.crclumcd});
+  const ListPage({super.key, required this.userData});
   @override
   State<ListPage> createState() => _ListPageState();
-  final String? crclumcd;
+  final UserData userData;
 }
 
 class _ListPageState extends State<ListPage> {
   Map<String, List<Course>> courses = {};
   List<Course> filtered = [];
-  String? crclumcd;
   final List<FilterOption> grades = [
     FilterOption(name: '1'),
     FilterOption(name: '2'),
@@ -52,9 +50,6 @@ class _ListPageState extends State<ListPage> {
   @override
   void initState() {
     super.initState();
-    if (widget.crclumcd != null) {
-      crclumcd = widget.crclumcd;
-    }
     loadJson();
   }
 
@@ -94,16 +89,18 @@ class _ListPageState extends State<ListPage> {
       ],
     };
 
-    if (crclumcd != null) {
+    if (widget.userData.crclumcd != null) {
       for (String key in codes.keys) {
-        if (codes[key]!.contains(crclumcd)) {
+        if (codes[key]!.contains(widget.userData.crclumcd)) {
           for (Course course in courses[key]!) {
-            if (course.target.any((target) => crclumcd!.startsWith(target))) {
+            if (course.target.any(
+                (target) => widget.userData.crclumcd!.startsWith(target))) {
               filtered.add(course);
             }
           }
           for (Course course in courses['共通']!) {
-            if (course.target.any((target) => crclumcd!.startsWith(target))) {
+            if (course.target.any(
+                (target) => widget.userData.crclumcd!.startsWith(target))) {
               filtered.add(course);
             }
           }
@@ -187,7 +184,7 @@ class _ListPageState extends State<ListPage> {
         ],
         onSelected: (code) {
           setState(() {
-            crclumcd = code;
+            widget.userData.crclumcd = code;
           });
           filterCourse();
         });
@@ -297,7 +294,7 @@ class _ListPageState extends State<ListPage> {
               padding: const EdgeInsets.symmetric(horizontal: 10),
               child: CourseCard(
                 course: filtered[index],
-                crclumcd: crclumcd,
+                userData: widget.userData,
               ),
             ),
             childCount: filtered.length,
