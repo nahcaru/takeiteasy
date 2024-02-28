@@ -1,47 +1,33 @@
 import 'dart:async' show Future;
 import 'package:firebase_auth/firebase_auth.dart' hide EmailAuthProvider;
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import 'main.dart';
 
 class UserData {
   final User? user;
-  ThemeMode? themeMode;
+  int? themeModeIndex;
   String? crclumcd;
   final List<String> enrolledCourses = [];
 
   UserData({
     required this.user,
-  }) {
+  });
+
+  Future<void> init() async {
     if (user != null) {
       try {
-        FirebaseFirestore.instance
-            .collection('users')
-            .doc(user!.uid)
-            .get()
-            .then((ref) {
-          themeMode = ref.get('themeMode');
-        });
-      } catch (error) {
-        //print(error);
-      }
-      try {
-        FirebaseFirestore.instance
-            .collection('users')
-            .doc(user!.uid)
-            .get()
-            .then((ref) {
-          crclumcd = ref.get('crclumcd');
-        });
-      } catch (error) {
-        //print(error);
-      }
-      try {
-        FirebaseFirestore.instance
-            .collection('users')
-            .doc(user!.uid)
-            .get()
-            .then((ref) {
-          themeMode = ref.get('themeMode');
+        await _getUserDoc().get().then((ref) {
+          if (ref.data()!['themeModeIndex'] != null) {
+            themeModeIndex = ref.get('themeModeIndex');
+          }
+          if (ref.data()!['crclumcd'] != null) {
+            crclumcd = ref.get('crclumcd');
+          }
+          if (ref.data()!['enrolledCourses'] != null) {
+            enrolledCourses.addAll(ref.get('enrolledCourses').cast<String>());
+          }
         });
       } catch (error) {
         //print(error);
@@ -49,14 +35,11 @@ class UserData {
     }
   }
 
-  Future<void> setThemeMode(ThemeMode themeMode) async {
-    this.themeMode = themeMode;
+  Future<void> setThemeMode(int themeModeIndex) async {
+    this.themeModeIndex = themeModeIndex;
     if (user != null) {
       try {
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(user!.uid)
-            .set({'enrolledCourses': enrolledCourses});
+        await _getUserDoc().update({'themeModeIndex': themeModeIndex});
       } catch (error) {
         //print(error);
       }
@@ -67,10 +50,7 @@ class UserData {
     this.crclumcd = crclumcd;
     if (user != null) {
       try {
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(user!.uid)
-            .set({'crclumcd': crclumcd});
+        await _getUserDoc().update({'crclumcd': crclumcd});
       } catch (error) {
         //print(error);
       }
@@ -79,13 +59,9 @@ class UserData {
 
   Future<void> addCourse(String kougicd) async {
     enrolledCourses.add(kougicd);
-
     if (user != null) {
       try {
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(user!.uid)
-            .set({'enrolledCourses': enrolledCourses});
+        await _getUserDoc().update({'enrolledCourses': enrolledCourses});
       } catch (error) {
         //print(error);
       }
@@ -94,16 +70,16 @@ class UserData {
 
   Future<void> removeCourse(String kougicd) async {
     enrolledCourses.remove(kougicd);
-
     if (user != null) {
       try {
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(user!.uid)
-            .set({'enrolledCourses': enrolledCourses});
+        await _getUserDoc().update({'enrolledCourses': enrolledCourses});
       } catch (error) {
         //print(error);
       }
     }
+  }
+
+  DocumentReference<Map<String, dynamic>> _getUserDoc() {
+    return FirebaseFirestore.instance.collection('users').doc(user!.uid);
   }
 }

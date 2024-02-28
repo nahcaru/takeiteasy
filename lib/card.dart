@@ -20,7 +20,7 @@ class _CourseCardState extends State<CourseCard> {
       mode: LaunchMode.inAppBrowserView,
       webOnlyWindowName: '_blank',
     )) {
-      throw Exception('Could not launch $url');
+      //throw Exception('Could not launch $url');
     }
   }
 

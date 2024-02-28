@@ -1,34 +1,71 @@
 import 'dart:ui';
-import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart' hide EmailAuthProvider;
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
+import 'package:firebase_ui_oauth_google/firebase_ui_oauth_google.dart';
+import 'package:firebase_ui_localizations/firebase_ui_localizations.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_web_plugins/flutter_web_plugins.dart';
+import 'package:google_fonts/google_fonts.dart';
+//import 'package:go_router/go_router.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'firebase_options.dart';
 import 'user.dart';
 import 'list.dart';
 import 'table.dart';
 
+// final GoRouter _router = GoRouter(
+//   initialLocation: '/',
+//   routes: [
+//     GoRoute(
+//       path: '/',
+//       builder: (context, state) {
+//         return HomePage(
+//           userData: userData,
+//           setThemeMode: (themeMode) {
+//             setState(() {
+//               userData.setThemeMode(themeMode);
+//             });
+//           },
+//         );
+//       },
+//     ),
+//     GoRoute(
+//       path: '/login',
+//       builder: (context, state) {
+//         return const AuthGate();
+//       },
+//     )
+//   ],
+// );
+
+const iOSClientId =
+    '768002894558-cn6rn5lb3i035srdudgl1q2g1joret0p.apps.googleusercontent.com';
+const webClientId =
+    '768002894558-gsau1go5eqfkuo6ht67vqv6s7ij2rbsk.apps.googleusercontent.com';
+
+final themeProvider = StateProvider<int>((ref) => ThemeMode.system.index);
+
 void main() async {
+  setUrlStrategy(PathUrlStrategy());
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  runApp(const MyApp());
+  FirebaseUIAuth.configureProviders([
+    GoogleProvider(clientId: webClientId),
+  ]);
+  runApp(const ProviderScope(child: MyApp()));
 }
 
-class MyApp extends StatefulWidget {
+class MyApp extends ConsumerWidget {
   const MyApp({super.key});
-  @override
-  State<MyApp> createState() => _MyAppState();
-}
-
-class _MyAppState extends State<MyApp> {
-  UserData userData = UserData(user: FirebaseAuth.instance.currentUser);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    ref.read(themeProvider);
     return MaterialApp(
       title: 'Take it Easy (Unofficial)',
       theme: ThemeData(
@@ -42,77 +79,106 @@ class _MyAppState extends State<MyApp> {
         ),
         textTheme: GoogleFonts.mPlus1pTextTheme(ThemeData.dark().textTheme),
       ),
-      themeMode: userData.themeMode ?? ThemeMode.system,
+      themeMode: ThemeMode.values[ref.watch(themeProvider)],
+      supportedLocales: const [
+        Locale('ja', 'JP'), // Japanese
+      ],
+      locale: const Locale('ja', 'JP'),
+      localizationsDelegates: [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        FirebaseUILocalizations.delegate,
+      ],
       debugShowCheckedModeBanner: false,
-      home: HomePage(
-        userData: userData,
-        setThemeMode: (ThemeMode themeMode) {
-          setState(() {
-            userData.setThemeMode(themeMode);
-          });
-        },
-      ),
+      initialRoute: '/',
+      routes: {
+        '/': (context) => const HomePage(),
+        '/login': (context) => const AuthGate(),
+      },
     );
   }
 }
 
 class AuthGate extends StatelessWidget {
   const AuthGate({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<User?>(
-      stream: FirebaseAuth.instance.authStateChanges(),
-      builder: (context, snapshot) {
-        if (!snapshot.hasData) {
-          return MaterialApp(
-            theme: ThemeData(
-              colorSchemeSeed: Colors.lightBlue,
-              textTheme: GoogleFonts.mPlus1pTextTheme(ThemeData().textTheme),
-            ),
-            darkTheme: ThemeData.dark().copyWith(
-              colorScheme: ColorScheme.fromSeed(
-                seedColor: Colors.indigo,
-                brightness: Brightness.dark,
-              ),
-              textTheme:
-                  GoogleFonts.mPlus1pTextTheme(ThemeData.dark().textTheme),
-            ),
-            themeMode: ThemeMode.system,
-            home: SignInScreen(providers: [
-              EmailAuthProvider(),
-            ]),
-          );
-        }
-        return const MyApp();
-      },
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('ログイン'),
+      ),
+      body: SignInScreen(
+        providers: [
+          EmailAuthProvider(),
+          GoogleProvider(
+            clientId: webClientId,
+          )
+        ],
+        actions: [
+          AuthStateChangeAction<SignedIn>((context, _) {
+            Navigator.of(context).pushReplacementNamed('/');
+          }),
+        ],
+        // ...
+      ),
     );
   }
 }
 
-class HomePage extends StatefulWidget {
-  const HomePage(
-      {super.key, required this.userData, required this.setThemeMode});
-  final void Function(ThemeMode) setThemeMode;
-  final UserData userData;
+class HomePage extends ConsumerStatefulWidget {
+  const HomePage({
+    super.key,
+  });
   @override
-  State<HomePage> createState() => _HomePageState();
+  ConsumerState<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends ConsumerState<HomePage> {
+  UserData userData = UserData(user: FirebaseAuth.instance.currentUser);
   int currentPageIndex = 0;
   bool extended = false;
-  String? crclumcd;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _showProgressDialog());
+  }
+
+  void _showProgressDialog() {
+    showGeneralDialog(
+        context: context,
+        barrierDismissible: false,
+        transitionDuration: const Duration(milliseconds: 300),
+        barrierColor: Colors.black.withOpacity(0.5),
+        pageBuilder: (BuildContext context, Animation animation,
+            Animation secondaryAnimation) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        });
+    userData.init().then((value) {
+      if (userData.themeModeIndex != null) {
+        ref.read(themeProvider.notifier).state = userData.themeModeIndex!;
+      }
+      Navigator.of(context).pop();
+    });
+  }
+
+  Future<void> logout() async {
+    await FirebaseAuth.instance.signOut().then((_) => _showProgressDialog());
+  }
+
+  void setThemeMode(int themeModeIndex) {
+    ref.read(themeProvider.notifier).state = themeModeIndex;
+    userData.setThemeMode(themeModeIndex);
   }
 
   @override
   Widget build(BuildContext context) {
     var screenSize = MediaQuery.of(context).size;
     bool portrait = (screenSize.width / screenSize.height) < 1;
-
     return Scaffold(
       appBar: portrait
           ? AppBar(
@@ -131,41 +197,26 @@ class _HomePageState extends State<HomePage> {
                 Theme.of(context).brightness == Brightness.dark
                     ? IconButton(
                         tooltip: 'ライトモード',
-                        onPressed: () => widget.setThemeMode(ThemeMode.light),
-                        //onPressed: widget.userData.toggleThemeMode,
+                        onPressed: () => setThemeMode(ThemeMode.light.index),
                         icon: const Icon(Icons.light_mode),
                       )
                     : IconButton(
                         tooltip: 'ダークモード',
-                        onPressed: () => widget.setThemeMode(ThemeMode.dark),
-                        //onPressed: widget.userData.toggleThemeMode,
+                        onPressed: () => setThemeMode(ThemeMode.dark.index),
                         icon: const Icon(Icons.dark_mode),
                       ),
-                FirebaseAuth.instance.currentUser == null
+                userData.user == null
                     ? IconButton(
                         tooltip: 'ログイン',
-                        onPressed: () async {
-                          await Navigator.of(context).pushReplacement(
-                            MaterialPageRoute(builder: (context) {
-                              return const AuthGate();
-                            }),
-                          );
-                        },
+                        onPressed: () async =>
+                            await Navigator.of(context).pushNamed('/login'),
                         icon: const Icon(
                           Icons.login,
                         ),
                       )
                     : IconButton(
                         tooltip: 'ログアウト',
-                        onPressed: () async {
-                          NavigatorState nav = Navigator.of(context);
-                          await FirebaseAuth.instance.signOut();
-                          await nav.pushReplacement(
-                            MaterialPageRoute(builder: (context) {
-                              return const AuthGate();
-                            }),
-                          );
-                        },
+                        onPressed: () => logout(),
                         icon: const Icon(
                           Icons.logout,
                         ),
@@ -258,7 +309,7 @@ class _HomePageState extends State<HomePage> {
                             icon: const Icon(Icons.light_mode),
                             buttonStyleButton: FilledButton.tonalIcon(
                               onPressed: () =>
-                                  widget.setThemeMode(ThemeMode.light),
+                                  setThemeMode(ThemeMode.light.index),
                               icon: const Icon(Icons.light_mode),
                               label: const Text('ライトモード'),
                             ),
@@ -267,22 +318,17 @@ class _HomePageState extends State<HomePage> {
                             icon: const Icon(Icons.dark_mode),
                             buttonStyleButton: FilledButton.tonalIcon(
                               onPressed: () =>
-                                  widget.setThemeMode(ThemeMode.dark),
+                                  setThemeMode(ThemeMode.dark.index),
                               icon: const Icon(Icons.dark_mode),
                               label: const Text('ダークモード'),
                             ),
                           ),
-                    FirebaseAuth.instance.currentUser == null
+                    userData.user == null
                         ? NavigationRailButton(
                             icon: const Icon(Icons.login),
                             buttonStyleButton: OutlinedButton.icon(
-                              onPressed: () async {
-                                await Navigator.of(context).pushReplacement(
-                                  MaterialPageRoute(builder: (context) {
-                                    return const AuthGate();
-                                  }),
-                                );
-                              },
+                              onPressed: () =>
+                                  Navigator.pushNamed(context, '/login'),
                               icon: const Icon(Icons.login),
                               label: const Text('ログイン'),
                             ),
@@ -290,15 +336,7 @@ class _HomePageState extends State<HomePage> {
                         : NavigationRailButton(
                             icon: const Icon(Icons.logout),
                             buttonStyleButton: OutlinedButton.icon(
-                              onPressed: () async {
-                                NavigatorState nav = Navigator.of(context);
-                                await FirebaseAuth.instance.signOut();
-                                await nav.pushReplacement(
-                                  MaterialPageRoute(builder: (context) {
-                                    return const AuthGate();
-                                  }),
-                                );
-                              },
+                              onPressed: () => logout(),
                               icon: const Icon(Icons.logout),
                               label: const Text('ログアウト'),
                             ),
@@ -309,8 +347,8 @@ class _HomePageState extends State<HomePage> {
             ),
           Expanded(
             child: IndexedStack(index: currentPageIndex, children: [
-              ListPage(userData: widget.userData),
-              const Placeholder()
+              ListScreen(userData: userData),
+              const TableScreen()
             ]),
           ),
         ],

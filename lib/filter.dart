@@ -2,16 +2,21 @@ import 'package:flutter/material.dart';
 import 'course.dart';
 
 class ChoiceBox extends StatelessWidget {
-  const ChoiceBox({super.key, required this.options, required this.onSelected});
+  const ChoiceBox(
+      {super.key,
+      required this.options,
+      required this.initialSelection,
+      required this.onSelected});
   final List<Map<String, String>> options;
+  final String? initialSelection;
   final void Function(String?)? onSelected;
   @override
   Widget build(BuildContext context) {
     return ButtonTheme(
       alignedDropdown: true,
       child: DropdownMenu<String>(
+        initialSelection: initialSelection,
         menuHeight: 300,
-        //enableFilter: true,
         onSelected: (value) {
           onSelected?.call(value);
         },
@@ -62,10 +67,16 @@ class SearchBox extends StatelessWidget {
   }
 }
 
-class FilterButton extends StatelessWidget {
+class FilterButton extends StatefulWidget {
   const FilterButton({super.key, required this.options, this.onChanged});
   final List<FilterOption> options;
   final void Function(bool?)? onChanged;
+
+  @override
+  State<FilterButton> createState() => _FilterButtonState();
+}
+
+class _FilterButtonState extends State<FilterButton> {
   @override
   Widget build(BuildContext context) {
     return MenuAnchor(
@@ -77,14 +88,16 @@ class FilterButton extends StatelessWidget {
         onPressed: () =>
             controller.isOpen ? controller.close() : controller.open(),
       ),
-      menuChildren: options
+      menuChildren: widget.options
           .map((option) => CheckboxListTile(
                 controlAffinity: ListTileControlAffinity.leading,
                 title: Text(option.name),
                 value: option.value,
                 onChanged: (bool? value) {
-                  option.value = value!;
-                  onChanged?.call(value);
+                  setState(() {
+                    option.value = value!;
+                  });
+                  widget.onChanged?.call(value);
                 },
               ))
           .toList(),

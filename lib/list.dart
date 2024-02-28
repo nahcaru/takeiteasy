@@ -7,15 +7,14 @@ import 'filter.dart';
 import 'card.dart';
 import 'course.dart';
 
-class ListPage extends StatefulWidget {
-  //const ListPage({super.key, required this.courseList});
-  const ListPage({super.key, required this.userData});
+class ListScreen extends StatefulWidget {
+  const ListScreen({super.key, required this.userData});
   @override
-  State<ListPage> createState() => _ListPageState();
+  State<ListScreen> createState() => _ListScreenState();
   final UserData userData;
 }
 
-class _ListPageState extends State<ListPage> {
+class _ListScreenState extends State<ListScreen> {
   Map<String, List<Course>> courses = {};
   List<Course> filtered = [];
   final List<FilterOption> grades = [
@@ -51,6 +50,9 @@ class _ListPageState extends State<ListPage> {
   void initState() {
     super.initState();
     loadJson();
+    setState(() {
+      filterCourse();
+    });
   }
 
   Future<void> loadJson() async {
@@ -182,11 +184,14 @@ class _ListPageState extends State<ListPage> {
           {'name': '知能24(一般)', 'code': 's24320'},
           {'name': '知能24(国際)', 'code': 's24321'},
         ],
+        initialSelection: widget.userData.crclumcd,
         onSelected: (code) {
-          setState(() {
-            widget.userData.crclumcd = code;
-          });
-          filterCourse();
+          if (code != null) {
+            setState(() {
+              widget.userData.setCurriculumCode(code);
+            });
+            filterCourse();
+          }
         });
   }
 

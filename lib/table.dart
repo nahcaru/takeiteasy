@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 
-class TablePage extends StatefulWidget {
-  const TablePage({super.key});
+class TableScreen extends StatefulWidget {
+  const TableScreen({super.key});
 
   @override
-  State<TablePage> createState() => _TablePageState();
+  State<TableScreen> createState() => _TableScreenState();
 }
 
-class _TablePageState extends State<TablePage> {
+class _TableScreenState extends State<TableScreen> {
   List<Map<String, dynamic>> data = [];
   List<Map<String, dynamic>> filtered = [];
   List<String> tookClasses = [];
@@ -235,137 +235,44 @@ class _TablePageState extends State<TablePage> {
   Widget build(BuildContext context) {
     var screenSize = MediaQuery.of(context).size;
     double ratio = (screenSize.width / screenSize.height);
-    return Row(
-      children: [
-        Expanded(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              children: [
-                (ratio < 1)
-                    ? Column(
-                        children: [
-                          timeTable('前半', formerClassNames, true),
-                          const SizedBox(
-                            height: 20,
-                          ),
-                          timeTable('後半', latterClassNames, false),
-                        ],
-                      )
-                    : Row(
-                        children: [
-                          Expanded(
-                            child: timeTable('前半', formerClassNames, true),
-                          ),
-                          const SizedBox(
-                            width: 20,
-                          ),
-                          Expanded(
-                            child: timeTable('後半', latterClassNames, false),
-                          ),
-                        ],
-                      ),
-                const SizedBox(
-                  height: 20,
-                ),
-                Table(
-                  defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-                  border: TableBorder.all(
-                      color: Theme.of(context).brightness == Brightness.dark
-                          ? Colors.white
-                          : Colors.black,
-                      borderRadius: BorderRadius.circular(10)),
-                  children: [
-                    const TableRow(children: [
-                      TableCell(
-                          child: Text(
-                        '集中',
-                        textAlign: TextAlign.center,
-                      )),
-                    ]),
-                    TableRow(
-                      children: [
-                        TableCell(
-                          child: (intensiveClassNames.isEmpty)
-                              ? Container(
-                                  margin: const EdgeInsets.all(5),
-                                  height: 50,
-                                )
-                              : SingleChildScrollView(
-                                  scrollDirection: Axis.horizontal,
-                                  child: Row(
-                                    children: [
-                                      for (int i = 0;
-                                          i < intensiveClassNames.length;
-                                          i++)
-                                        InkWell(
-                                          onTap: () {
-                                            Map<String, dynamic> item =
-                                                data.firstWhere((element) =>
-                                                    element['講義コード'] ==
-                                                    intensiveClasses[i]);
-                                            String info =
-                                                (item['クラス'] + ' ' + item['備考'])
-                                                    .trim();
-                                            showDialog(
-                                              context: context,
-                                              builder: (BuildContext context) {
-                                                return AlertDialog(
-                                                  title: SelectionArea(
-                                                    child: (info == '')
-                                                        ? Text(item['科目名'])
-                                                        : Text(
-                                                            '($info) ${item['科目名']}'),
-                                                  ),
-                                                  content: SelectionArea(
-                                                    child: Row(
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .start,
-                                                      children: [
-                                                        Text(
-                                                            '講義コード\n${item['講義コード']}\n\n教室\n${item['教室']}\n\n担当者\n${item['担当者']}'),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                  scrollable: true,
-                                                );
-                                              },
-                                            );
-                                          },
-                                          child: Container(
-                                            margin: const EdgeInsets.all(5),
-                                            height: 50,
-                                            decoration: BoxDecoration(
-                                                color: Colors.lightBlue
-                                                    .withAlpha(64),
-                                                borderRadius:
-                                                    const BorderRadius.all(
-                                                        Radius.circular(15))),
-                                            child: Center(
-                                              child: Text(
-                                                intensiveClassNames[i],
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                    ],
-                                  ),
+    return true
+        ? const Placeholder()
+        : Row(
+            children: [
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    children: [
+                      (ratio < 1)
+                          ? Column(
+                              children: [
+                                timeTable('前半', formerClassNames, true),
+                                const SizedBox(
+                                  height: 20,
                                 ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-                const SizedBox(
-                  height: 20,
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    if (1 <= ratio) Expanded(child: Container()),
-                    Expanded(
-                      child: Table(
+                                timeTable('後半', latterClassNames, false),
+                              ],
+                            )
+                          : Row(
+                              children: [
+                                Expanded(
+                                  child:
+                                      timeTable('前半', formerClassNames, true),
+                                ),
+                                const SizedBox(
+                                  width: 20,
+                                ),
+                                Expanded(
+                                  child:
+                                      timeTable('後半', latterClassNames, false),
+                                ),
+                              ],
+                            ),
+                      const SizedBox(
+                        height: 20,
+                      ),
+                      Table(
                         defaultVerticalAlignment:
                             TableCellVerticalAlignment.middle,
                         border: TableBorder.all(
@@ -375,66 +282,175 @@ class _TablePageState extends State<TablePage> {
                                     : Colors.black,
                             borderRadius: BorderRadius.circular(10)),
                         children: [
+                          const TableRow(children: [
+                            TableCell(
+                                child: Text(
+                              '集中',
+                              textAlign: TextAlign.center,
+                            )),
+                          ]),
                           TableRow(
-                              decoration: BoxDecoration(
-                                  color: Theme.of(context).cardColor),
-                              children: const [
-                                TableCell(
-                                    child: Text(
-                                  '分類',
-                                  textAlign: TextAlign.center,
-                                )),
-                                TableCell(
-                                    child: Text(
-                                  '単位数',
-                                  textAlign: TextAlign.center,
-                                )),
-                              ]),
-                          for (int i = 0; i < categories.length - 1; i++)
-                            TableRow(
-                              children: [
-                                TableCell(
-                                    child: Text(
-                                  categories[i],
-                                  textAlign: TextAlign.center,
-                                )),
-                                TableCell(
-                                    child: Text(
-                                  tookCredits[i].toString(),
-                                  textAlign: TextAlign.center,
-                                )),
-                              ],
-                            ),
-                          TableRow(
-                            decoration: BoxDecoration(
-                                color: Theme.of(context).cardColor),
                             children: [
-                              const TableCell(
-                                  child: Text(
-                                '合計',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              )),
                               TableCell(
-                                  child: Text(
-                                tookCredits.last.toString(),
-                                textAlign: TextAlign.center,
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.bold),
-                              )),
+                                child: (intensiveClassNames.isEmpty)
+                                    ? Container(
+                                        margin: const EdgeInsets.all(5),
+                                        height: 50,
+                                      )
+                                    : SingleChildScrollView(
+                                        scrollDirection: Axis.horizontal,
+                                        child: Row(
+                                          children: [
+                                            for (int i = 0;
+                                                i < intensiveClassNames.length;
+                                                i++)
+                                              InkWell(
+                                                onTap: () {
+                                                  Map<String, dynamic> item =
+                                                      data.firstWhere(
+                                                          (element) =>
+                                                              element[
+                                                                  '講義コード'] ==
+                                                              intensiveClasses[
+                                                                  i]);
+                                                  String info = (item['クラス'] +
+                                                          ' ' +
+                                                          item['備考'])
+                                                      .trim();
+                                                  showDialog(
+                                                    context: context,
+                                                    builder:
+                                                        (BuildContext context) {
+                                                      return AlertDialog(
+                                                        title: SelectionArea(
+                                                          child: (info == '')
+                                                              ? Text(
+                                                                  item['科目名'])
+                                                              : Text(
+                                                                  '($info) ${item['科目名']}'),
+                                                        ),
+                                                        content: SelectionArea(
+                                                          child: Row(
+                                                            mainAxisAlignment:
+                                                                MainAxisAlignment
+                                                                    .start,
+                                                            children: [
+                                                              Text(
+                                                                  '講義コード\n${item['講義コード']}\n\n教室\n${item['教室']}\n\n担当者\n${item['担当者']}'),
+                                                            ],
+                                                          ),
+                                                        ),
+                                                        scrollable: true,
+                                                      );
+                                                    },
+                                                  );
+                                                },
+                                                child: Container(
+                                                  margin:
+                                                      const EdgeInsets.all(5),
+                                                  height: 50,
+                                                  decoration: BoxDecoration(
+                                                      color: Colors.lightBlue
+                                                          .withAlpha(64),
+                                                      borderRadius:
+                                                          const BorderRadius
+                                                              .all(
+                                                              Radius.circular(
+                                                                  15))),
+                                                  child: Center(
+                                                    child: Text(
+                                                      intensiveClassNames[i],
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                          ],
+                                        ),
+                                      ),
+                              ),
                             ],
                           ),
                         ],
                       ),
-                    ),
-                    if (1 <= ratio) Expanded(child: Container()),
-                  ],
+                      const SizedBox(
+                        height: 20,
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          if (1 <= ratio) Expanded(child: Container()),
+                          Expanded(
+                            child: Table(
+                              defaultVerticalAlignment:
+                                  TableCellVerticalAlignment.middle,
+                              border: TableBorder.all(
+                                  color: Theme.of(context).brightness ==
+                                          Brightness.dark
+                                      ? Colors.white
+                                      : Colors.black,
+                                  borderRadius: BorderRadius.circular(10)),
+                              children: [
+                                TableRow(
+                                    decoration: BoxDecoration(
+                                        color: Theme.of(context).cardColor),
+                                    children: const [
+                                      TableCell(
+                                          child: Text(
+                                        '分類',
+                                        textAlign: TextAlign.center,
+                                      )),
+                                      TableCell(
+                                          child: Text(
+                                        '単位数',
+                                        textAlign: TextAlign.center,
+                                      )),
+                                    ]),
+                                for (int i = 0; i < categories.length - 1; i++)
+                                  TableRow(
+                                    children: [
+                                      TableCell(
+                                          child: Text(
+                                        categories[i],
+                                        textAlign: TextAlign.center,
+                                      )),
+                                      TableCell(
+                                          child: Text(
+                                        tookCredits[i].toString(),
+                                        textAlign: TextAlign.center,
+                                      )),
+                                    ],
+                                  ),
+                                TableRow(
+                                  decoration: BoxDecoration(
+                                      color: Theme.of(context).cardColor),
+                                  children: [
+                                    const TableCell(
+                                        child: Text(
+                                      '合計',
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold),
+                                    )),
+                                    TableCell(
+                                        child: Text(
+                                      tookCredits.last.toString(),
+                                      textAlign: TextAlign.center,
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.bold),
+                                    )),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                          if (1 <= ratio) Expanded(child: Container()),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
+              ),
+            ],
+          );
   }
 }
