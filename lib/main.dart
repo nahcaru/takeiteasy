@@ -10,6 +10,7 @@ import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 
+import 'env/env.dart';
 import 'firebase_options.dart';
 import 'models/user_data.dart';
 import 'screens/list.dart';
@@ -27,11 +28,6 @@ final GoRouter _router = GoRouter(
   ],
 );
 
-const iOSClientId =
-    '768002894558-cn6rn5lb3i035srdudgl1q2g1joret0p.apps.googleusercontent.com';
-const webClientId =
-    '768002894558-gsau1go5eqfkuo6ht67vqv6s7ij2rbsk.apps.googleusercontent.com';
-
 void main() async {
   setUrlStrategy(PathUrlStrategy());
   WidgetsFlutterBinding.ensureInitialized();
@@ -39,7 +35,7 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   FirebaseUIAuth.configureProviders([
-    GoogleProvider(clientId: webClientId),
+    GoogleProvider(clientId: Env.webGoogleClientId),
   ]);
   runApp(const ProviderScope(child: MyApp()));
 }
@@ -49,16 +45,16 @@ class MyApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(userDataNotifierProvider);
+    final AsyncValue<UserData> state = ref.watch(userDataNotifierProvider);
     return MaterialApp.router(
       title: 'Take it Easy (Unofficial)',
       theme: ThemeData(
-        colorSchemeSeed: Colors.lightBlue,
+        colorSchemeSeed: const Color(0xFF00A7EB),
         textTheme: GoogleFonts.mPlus1pTextTheme(ThemeData().textTheme),
       ),
       darkTheme: ThemeData.dark().copyWith(
         colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.indigo,
+          seedColor: const Color(0xFF0044EB),
           brightness: Brightness.dark,
         ),
         textTheme: GoogleFonts.mPlus1pTextTheme(ThemeData.dark().textTheme),
@@ -95,7 +91,7 @@ class AuthGate extends StatelessWidget {
         providers: [
           EmailAuthProvider(),
           GoogleProvider(
-            clientId: webClientId,
+            clientId: Env.webGoogleClientId,
           )
         ],
         actions: [
@@ -139,7 +135,7 @@ class _HomePageState extends ConsumerState<HomePage> {
             child: CircularProgressIndicator(),
           );
         });
-    ref.read(userDataNotifierProvider).whenData((value) => context.pop());
+    ref.watch(userDataNotifierProvider).whenData((_) => context.pop());
   }
 
   void login() {
@@ -156,9 +152,9 @@ class _HomePageState extends ConsumerState<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    var screenSize = MediaQuery.of(context).size;
-    bool portrait = (screenSize.width / screenSize.height) < 1;
-    bool loggedIn = ref.watch(authProvider).currentUser != null;
+    final Size screenSize = MediaQuery.of(context).size;
+    final bool portrait = (screenSize.width / screenSize.height) < 1;
+    final bool loggedIn = ref.watch(authProvider).currentUser != null;
     return Scaffold(
       appBar: portrait
           ? AppBar(

@@ -26,7 +26,7 @@ class _CourseCardState extends ConsumerState<CourseCard> {
 
   @override
   Widget build(BuildContext context) {
-    final asyncValue = ref.watch(userDataNotifierProvider);
+    final AsyncValue<UserData> asyncValue = ref.watch(userDataNotifierProvider);
     asyncValue.when(
       data: (data) => Card(
         child: InkWell(

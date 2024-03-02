@@ -234,7 +234,7 @@ class _ListScreenState extends ConsumerState<ListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final AsyncValue asyncValue = ref.watch(userDataNotifierProvider);
+    final AsyncValue<UserData> asyncValue = ref.watch(userDataNotifierProvider);
     final Size screenSize = MediaQuery.of(context).size;
     final bool portrait = (screenSize.width / screenSize.height) < 1;
     return asyncValue.when(

@@ -19,7 +19,7 @@ publish_to: "none" # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
-  sdk: ">=2.19.2 <3.0.0"
+  sdk: ">=3.0.0 <4.0.0"
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -51,6 +51,7 @@ dependencies:
   flutter_riverpod: ^2.4.10
   flutter_web_plugins:
     sdk: flutter
+  envied: ^0.5.3
 
 flutter_launcher_icons:
   android: false
@@ -75,6 +76,8 @@ dev_dependencies:
   flutter_lints: ^3.0.1
   custom_lint: ^0.6.2
   riverpod_lint: ^2.3.9
+  envied_generator: ^0.5.3
+  build_runner: ^2.4.8
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
