@@ -2,19 +2,19 @@ import 'dart:async' show Future;
 import 'dart:convert';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter/material.dart';
-import 'user.dart';
-import 'filter.dart';
-import 'card.dart';
-import 'course.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../models/user_data.dart';
+import '../widgets/filter.dart';
+import '../widgets/card.dart';
+import '../models/course.dart';
 
-class ListScreen extends StatefulWidget {
-  const ListScreen({super.key, required this.userData});
+class ListScreen extends ConsumerStatefulWidget {
+  const ListScreen({super.key});
   @override
-  State<ListScreen> createState() => _ListScreenState();
-  final UserData userData;
+  ConsumerState<ListScreen> createState() => _ListScreenState();
 }
 
-class _ListScreenState extends State<ListScreen> {
+class _ListScreenState extends ConsumerState<ListScreen> {
   Map<String, List<Course>> courses = {};
   List<Course> filtered = [];
   final List<FilterOption> grades = [
@@ -50,9 +50,9 @@ class _ListScreenState extends State<ListScreen> {
   void initState() {
     super.initState();
     loadJson();
-    setState(() {
-      filterCourse();
-    });
+    ref
+        .read(userDataNotifierProvider)
+        .whenData((value) => filterCourse(value.crclumcd));
   }
 
   Future<void> loadJson() async {
@@ -66,9 +66,9 @@ class _ListScreenState extends State<ListScreen> {
     }
   }
 
-  void filterCourse() {
+  void filterCourse(String? crclumcd) {
     filtered = [];
-    Map<String, dynamic> codes = {
+    Map<String, List<String>> codes = {
       '情科': [
         's21310',
         's21311',
@@ -91,18 +91,16 @@ class _ListScreenState extends State<ListScreen> {
       ],
     };
 
-    if (widget.userData.crclumcd != null) {
+    if (crclumcd != null) {
       for (String key in codes.keys) {
-        if (codes[key]!.contains(widget.userData.crclumcd)) {
+        if (codes[key]!.contains(crclumcd)) {
           for (Course course in courses[key]!) {
-            if (course.target.any(
-                (target) => widget.userData.crclumcd!.startsWith(target))) {
+            if (course.target.any((target) => crclumcd.startsWith(target))) {
               filtered.add(course);
             }
           }
           for (Course course in courses['共通']!) {
-            if (course.target.any(
-                (target) => widget.userData.crclumcd!.startsWith(target))) {
+            if (course.target.any((target) => crclumcd.startsWith(target))) {
               filtered.add(course);
             }
           }
@@ -164,7 +162,7 @@ class _ListScreenState extends State<ListScreen> {
   //   setState(() {});
   // }
 
-  ChoiceBox _choiceBox() {
+  ChoiceBox _choiceBox(String? crclumcd) {
     return ChoiceBox(
         options: const [
           {'name': '情科21(一般)', 'code': 's21310'},
@@ -184,18 +182,16 @@ class _ListScreenState extends State<ListScreen> {
           {'name': '知能24(一般)', 'code': 's24320'},
           {'name': '知能24(国際)', 'code': 's24321'},
         ],
-        initialSelection: widget.userData.crclumcd,
+        initialSelection: crclumcd,
         onSelected: (code) {
           if (code != null) {
-            setState(() {
-              widget.userData.setCurriculumCode(code);
-            });
-            filterCourse();
+            ref.read(userDataNotifierProvider.notifier).setCrclumcd(code);
+            filterCourse(code);
           }
         });
   }
 
-  Row _filters() {
+  Row _filters(String? crclumcd) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -203,7 +199,7 @@ class _ListScreenState extends State<ListScreen> {
         FilterButton(
             options: grades,
             onChanged: (bool? value) {
-              filterCourse();
+              filterCourse(crclumcd);
             }),
         const SizedBox(
           width: 5,
@@ -212,7 +208,7 @@ class _ListScreenState extends State<ListScreen> {
         FilterButton(
             options: terms,
             onChanged: (bool? value) {
-              filterCourse();
+              filterCourse(crclumcd);
             }),
         const SizedBox(
           width: 5,
@@ -221,7 +217,7 @@ class _ListScreenState extends State<ListScreen> {
         FilterButton(
             options: categories,
             onChanged: (bool? value) {
-              filterCourse();
+              filterCourse(crclumcd);
             }),
         const SizedBox(
           width: 5,
@@ -230,7 +226,7 @@ class _ListScreenState extends State<ListScreen> {
         FilterButton(
             options: compulsories,
             onChanged: (bool? value) {
-              filterCourse();
+              filterCourse(crclumcd);
             }),
       ],
     );
@@ -238,74 +234,78 @@ class _ListScreenState extends State<ListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    var screenSize = MediaQuery.of(context).size;
-    bool portrait = (screenSize.width / screenSize.height) < 1;
-    return CustomScrollView(
-      slivers: [
-        SliverAppBar(
-          pinned: true,
-          floating: true,
-          toolbarHeight: 0,
-          expandedHeight: portrait ? 140 : 60,
-          scrolledUnderElevation: 0,
-          flexibleSpace: FlexibleSpaceBar(
-            background: portrait
-                ? Column(children: [
-                    _choiceBox(),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    SearchBox(
-                      options: filtered,
-                    ),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: _filters(),
-                    ),
-                  ])
-                : Align(
-                    alignment: Alignment.center,
-                    child: SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 10),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            _choiceBox(),
+    final AsyncValue asyncValue = ref.watch(userDataNotifierProvider);
+    final Size screenSize = MediaQuery.of(context).size;
+    final bool portrait = (screenSize.width / screenSize.height) < 1;
+    return asyncValue.when(
+        data: (data) => CustomScrollView(
+              slivers: [
+                SliverAppBar(
+                  pinned: true,
+                  floating: true,
+                  toolbarHeight: 0,
+                  expandedHeight: portrait ? 140 : 60,
+                  scrolledUnderElevation: 0,
+                  flexibleSpace: FlexibleSpaceBar(
+                    background: portrait
+                        ? Column(children: [
+                            _choiceBox(data.crclumcd),
                             const SizedBox(
-                              width: 20,
+                              height: 10,
                             ),
                             SearchBox(
                               options: filtered,
                             ),
                             const SizedBox(
-                              width: 20,
+                              height: 10,
                             ),
-                            _filters(),
-                          ],
-                        ),
+                            SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: _filters(data.crclumcd),
+                            ),
+                          ])
+                        : Align(
+                            alignment: Alignment.center,
+                            child: SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 10),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    _choiceBox(data.crclumcd),
+                                    const SizedBox(
+                                      width: 20,
+                                    ),
+                                    SearchBox(
+                                      options: filtered,
+                                    ),
+                                    const SizedBox(
+                                      width: 20,
+                                    ),
+                                    _filters(data.crclumcd),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                  ),
+                ),
+                SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (BuildContext context, int index) => Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      child: CourseCard(
+                        course: filtered[index],
                       ),
                     ),
+                    childCount: filtered.length,
                   ),
-          ),
-        ),
-        SliverList(
-          delegate: SliverChildBuilderDelegate(
-            (BuildContext context, int index) => Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10),
-              child: CourseCard(
-                course: filtered[index],
-                userData: widget.userData,
-              ),
+                ),
+              ],
             ),
-            childCount: filtered.length,
-          ),
-        ),
-      ],
-    );
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, stack) => const Center(child: Text('エラーが発生しました')));
   }
 }

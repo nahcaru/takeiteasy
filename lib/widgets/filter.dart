@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'course.dart';
+import '../models/course.dart';
 
 class ChoiceBox extends StatelessWidget {
   const ChoiceBox(

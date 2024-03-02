@@ -1,52 +1,36 @@
 import 'dart:ui';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_auth/firebase_auth.dart' hide EmailAuthProvider;
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:firebase_ui_oauth_google/firebase_ui_oauth_google.dart';
 import 'package:firebase_ui_localizations/firebase_ui_localizations.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 import 'package:google_fonts/google_fonts.dart';
-//import 'package:go_router/go_router.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import 'firebase_options.dart';
-import 'user.dart';
-import 'list.dart';
-import 'table.dart';
+import 'models/user_data.dart';
+import 'screens/list.dart';
+import 'screens/table.dart';
 
-// final GoRouter _router = GoRouter(
-//   initialLocation: '/',
-//   routes: [
-//     GoRoute(
-//       path: '/',
-//       builder: (context, state) {
-//         return HomePage(
-//           userData: userData,
-//           setThemeMode: (themeMode) {
-//             setState(() {
-//               userData.setThemeMode(themeMode);
-//             });
-//           },
-//         );
-//       },
-//     ),
-//     GoRoute(
-//       path: '/login',
-//       builder: (context, state) {
-//         return const AuthGate();
-//       },
-//     )
-//   ],
-// );
+final GoRouter _router = GoRouter(
+  initialLocation: '/',
+  routes: [
+    GoRoute(path: '/', builder: (context, state) => const HomePage(), routes: [
+      GoRoute(
+        path: 'login',
+        builder: (context, state) => const AuthGate(),
+      )
+    ])
+  ],
+);
 
 const iOSClientId =
     '768002894558-cn6rn5lb3i035srdudgl1q2g1joret0p.apps.googleusercontent.com';
 const webClientId =
     '768002894558-gsau1go5eqfkuo6ht67vqv6s7ij2rbsk.apps.googleusercontent.com';
-
-final themeProvider = StateProvider<int>((ref) => ThemeMode.system.index);
 
 void main() async {
   setUrlStrategy(PathUrlStrategy());
@@ -65,8 +49,8 @@ class MyApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    ref.read(themeProvider);
-    return MaterialApp(
+    final state = ref.watch(userDataNotifierProvider);
+    return MaterialApp.router(
       title: 'Take it Easy (Unofficial)',
       theme: ThemeData(
         colorSchemeSeed: Colors.lightBlue,
@@ -79,9 +63,9 @@ class MyApp extends ConsumerWidget {
         ),
         textTheme: GoogleFonts.mPlus1pTextTheme(ThemeData.dark().textTheme),
       ),
-      themeMode: ThemeMode.values[ref.watch(themeProvider)],
+      themeMode: ThemeMode.values[state.value?.themeModeIndex ?? 0],
       supportedLocales: const [
-        Locale('ja', 'JP'), // Japanese
+        Locale('ja', 'JP'),
       ],
       locale: const Locale('ja', 'JP'),
       localizationsDelegates: [
@@ -91,11 +75,9 @@ class MyApp extends ConsumerWidget {
         FirebaseUILocalizations.delegate,
       ],
       debugShowCheckedModeBanner: false,
-      initialRoute: '/',
-      routes: {
-        '/': (context) => const HomePage(),
-        '/login': (context) => const AuthGate(),
-      },
+      routerDelegate: _router.routerDelegate,
+      routeInformationParser: _router.routeInformationParser,
+      routeInformationProvider: _router.routeInformationProvider,
     );
   }
 }
@@ -118,7 +100,7 @@ class AuthGate extends StatelessWidget {
         ],
         actions: [
           AuthStateChangeAction<SignedIn>((context, _) {
-            Navigator.of(context).pushReplacementNamed('/');
+            context.go('/');
           }),
         ],
         // ...
@@ -136,7 +118,6 @@ class HomePage extends ConsumerStatefulWidget {
 }
 
 class _HomePageState extends ConsumerState<HomePage> {
-  UserData userData = UserData(user: FirebaseAuth.instance.currentUser);
   int currentPageIndex = 0;
   bool extended = false;
 
@@ -158,27 +139,26 @@ class _HomePageState extends ConsumerState<HomePage> {
             child: CircularProgressIndicator(),
           );
         });
-    userData.init().then((value) {
-      if (userData.themeModeIndex != null) {
-        ref.read(themeProvider.notifier).state = userData.themeModeIndex!;
-      }
-      Navigator.of(context).pop();
-    });
+    ref.read(userDataNotifierProvider).whenData((value) => context.pop());
+  }
+
+  void login() {
+    context.go('/login');
   }
 
   Future<void> logout() async {
-    await FirebaseAuth.instance.signOut().then((_) => _showProgressDialog());
+    await ref.watch(authProvider).signOut().then((_) => _showProgressDialog());
   }
 
   void setThemeMode(int themeModeIndex) {
-    ref.read(themeProvider.notifier).state = themeModeIndex;
-    userData.setThemeMode(themeModeIndex);
+    ref.watch(userDataNotifierProvider.notifier).setThemeMode(themeModeIndex);
   }
 
   @override
   Widget build(BuildContext context) {
     var screenSize = MediaQuery.of(context).size;
     bool portrait = (screenSize.width / screenSize.height) < 1;
+    bool loggedIn = ref.watch(authProvider).currentUser != null;
     return Scaffold(
       appBar: portrait
           ? AppBar(
@@ -205,20 +185,19 @@ class _HomePageState extends ConsumerState<HomePage> {
                         onPressed: () => setThemeMode(ThemeMode.dark.index),
                         icon: const Icon(Icons.dark_mode),
                       ),
-                userData.user == null
+                loggedIn
                     ? IconButton(
-                        tooltip: 'ログイン',
-                        onPressed: () async =>
-                            await Navigator.of(context).pushNamed('/login'),
-                        icon: const Icon(
-                          Icons.login,
-                        ),
-                      )
-                    : IconButton(
                         tooltip: 'ログアウト',
                         onPressed: () => logout(),
                         icon: const Icon(
                           Icons.logout,
+                        ),
+                      )
+                    : IconButton(
+                        tooltip: 'ログイン',
+                        onPressed: () async => login(),
+                        icon: const Icon(
+                          Icons.login,
                         ),
                       ),
                 const SizedBox(width: 15),
@@ -303,6 +282,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                 ],
                 trailing: Column(
                   children: [
+                    const SizedBox(height: 8.0),
                     const NavigationRailExpanded(child: Divider()),
                     Theme.of(context).brightness == Brightness.dark
                         ? NavigationRailButton(
@@ -323,22 +303,21 @@ class _HomePageState extends ConsumerState<HomePage> {
                               label: const Text('ダークモード'),
                             ),
                           ),
-                    userData.user == null
+                    loggedIn
                         ? NavigationRailButton(
-                            icon: const Icon(Icons.login),
-                            buttonStyleButton: OutlinedButton.icon(
-                              onPressed: () =>
-                                  Navigator.pushNamed(context, '/login'),
-                              icon: const Icon(Icons.login),
-                              label: const Text('ログイン'),
-                            ),
-                          )
-                        : NavigationRailButton(
                             icon: const Icon(Icons.logout),
                             buttonStyleButton: OutlinedButton.icon(
                               onPressed: () => logout(),
                               icon: const Icon(Icons.logout),
                               label: const Text('ログアウト'),
+                            ),
+                          )
+                        : NavigationRailButton(
+                            icon: const Icon(Icons.login),
+                            buttonStyleButton: OutlinedButton.icon(
+                              onPressed: () => login(),
+                              icon: const Icon(Icons.login),
+                              label: const Text('ログイン'),
                             ),
                           ),
                   ],
@@ -346,10 +325,9 @@ class _HomePageState extends ConsumerState<HomePage> {
               ),
             ),
           Expanded(
-            child: IndexedStack(index: currentPageIndex, children: [
-              ListScreen(userData: userData),
-              const TableScreen()
-            ]),
+            child: IndexedStack(
+                index: currentPageIndex,
+                children: const [ListScreen(), TableScreen()]),
           ),
         ],
       ),

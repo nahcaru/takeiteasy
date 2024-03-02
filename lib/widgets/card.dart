@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'course.dart';
-import 'user.dart';
+import '../models/course.dart';
+import '../models/user_data.dart';
 import 'dart:async' show Future;
 
-class CourseCard extends StatefulWidget {
-  const CourseCard({super.key, required this.course, required this.userData});
+class CourseCard extends ConsumerStatefulWidget {
+  const CourseCard({super.key, required this.course});
   final Course course;
-  final UserData userData;
 
   @override
-  State<CourseCard> createState() => _CourseCardState();
+  ConsumerState<CourseCard> createState() => _CourseCardState();
 }
 
-class _CourseCardState extends State<CourseCard> {
+class _CourseCardState extends ConsumerState<CourseCard> {
   Future<void> _launchUrl(Uri url) async {
     if (!await launchUrl(
       url,
@@ -26,39 +26,44 @@ class _CourseCardState extends State<CourseCard> {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: InkWell(
-        onTap: () => _launchUrl(Uri(
-            scheme: 'https',
-            host: 'websrv.tcu.ac.jp',
-            path: '/tcu_web_v3/slbssbdr.do',
-            queryParameters: {
-              'value(risyunen)': '2023',
-              'value(semekikn)': '1',
-              'value(kougicd)': widget.course.code,
-              'value(crclumcd)': widget.userData.crclumcd,
-            })),
-        child: ListTile(
-            title: Text(widget.course.name),
-            subtitle: Text(widget.course.category[widget.userData.crclumcd]!),
-            trailing:
-                widget.userData.enrolledCourses.contains(widget.course.code)
-                    ? OutlinedButton.icon(
-                        onPressed: () => setState(() {
-                          widget.userData.removeCourse(widget.course.code);
-                        }),
-                        icon: const Icon(Icons.playlist_add_check),
-                        label: const Text('取消'),
-                      )
-                    : FilledButton.icon(
-                        onPressed: () => setState(() {
-                          widget.userData.addCourse(widget.course.code);
-                        }),
-                        icon: const Icon(Icons.playlist_add_outlined),
-                        label: const Text('登録'),
-                      )),
+    final asyncValue = ref.watch(userDataNotifierProvider);
+    asyncValue.when(
+      data: (data) => Card(
+        child: InkWell(
+          onTap: () => _launchUrl(Uri(
+              scheme: 'https',
+              host: 'websrv.tcu.ac.jp',
+              path: '/tcu_web_v3/slbssbdr.do',
+              queryParameters: {
+                'value(risyunen)': '2023',
+                'value(semekikn)': '1',
+                'value(kougicd)': widget.course.code,
+                'value(crclumcd)': data.crclumcd,
+              })),
+          child: ListTile(
+              title: Text(widget.course.name),
+              subtitle: Text(widget.course.category[data.crclumcd]!),
+              trailing: true
+                  ? OutlinedButton.icon(
+                      onPressed: () => setState(() {
+                        //widget.userData.removeCourse(widget.course.code);
+                      }),
+                      icon: const Icon(Icons.playlist_add_check),
+                      label: const Text('取消'),
+                    )
+                  : FilledButton.icon(
+                      onPressed: () => setState(() {
+                        //widget.userData.addCourse(widget.course.code);
+                      }),
+                      icon: const Icon(Icons.playlist_add_outlined),
+                      label: const Text('登録'),
+                    )),
+        ),
       ),
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (error, stackTrace) => Text('Error: $error'),
     );
+    return Container();
   }
 }
 
