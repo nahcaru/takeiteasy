@@ -80,7 +80,6 @@ class MyApp extends ConsumerWidget {
 
 class AuthGate extends StatelessWidget {
   const AuthGate({super.key});
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -202,11 +201,9 @@ class _HomePageState extends ConsumerState<HomePage> {
           : null,
       bottomNavigationBar: portrait
           ? NavigationBar(
-              onDestinationSelected: (int index) {
-                setState(() {
-                  currentPageIndex = index;
-                });
-              },
+              onDestinationSelected: (int index) => setState(() {
+                currentPageIndex = index;
+              }),
               selectedIndex: currentPageIndex,
               destinations: const [
                 NavigationDestination(

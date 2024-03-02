@@ -50,9 +50,6 @@ class _ListScreenState extends ConsumerState<ListScreen> {
   void initState() {
     super.initState();
     loadJson();
-    ref
-        .read(userDataNotifierProvider)
-        .whenData((value) => filterCourse(value.crclumcd));
   }
 
   Future<void> loadJson() async {
@@ -238,73 +235,75 @@ class _ListScreenState extends ConsumerState<ListScreen> {
     final Size screenSize = MediaQuery.of(context).size;
     final bool portrait = (screenSize.width / screenSize.height) < 1;
     return asyncValue.when(
-        data: (data) => CustomScrollView(
-              slivers: [
-                SliverAppBar(
-                  pinned: true,
-                  floating: true,
-                  toolbarHeight: 0,
-                  expandedHeight: portrait ? 140 : 60,
-                  scrolledUnderElevation: 0,
-                  flexibleSpace: FlexibleSpaceBar(
-                    background: portrait
-                        ? Column(children: [
-                            _choiceBox(data.crclumcd),
-                            const SizedBox(
-                              height: 10,
-                            ),
-                            SearchBox(
-                              options: filtered,
-                            ),
-                            const SizedBox(
-                              height: 10,
-                            ),
-                            SingleChildScrollView(
-                              scrollDirection: Axis.horizontal,
-                              child: _filters(data.crclumcd),
-                            ),
-                          ])
-                        : Align(
-                            alignment: Alignment.center,
-                            child: SingleChildScrollView(
-                              scrollDirection: Axis.horizontal,
-                              child: Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 10),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    _choiceBox(data.crclumcd),
-                                    const SizedBox(
-                                      width: 20,
-                                    ),
-                                    SearchBox(
-                                      options: filtered,
-                                    ),
-                                    const SizedBox(
-                                      width: 20,
-                                    ),
-                                    _filters(data.crclumcd),
-                                  ],
-                                ),
+        data: (data) {
+          filterCourse(data.crclumcd);
+          return CustomScrollView(
+            slivers: [
+              SliverAppBar(
+                pinned: true,
+                floating: true,
+                toolbarHeight: 0,
+                expandedHeight: portrait ? 140 : 60,
+                scrolledUnderElevation: 0,
+                flexibleSpace: FlexibleSpaceBar(
+                  background: portrait
+                      ? Column(children: [
+                          _choiceBox(data.crclumcd),
+                          const SizedBox(
+                            height: 10,
+                          ),
+                          SearchBox(
+                            options: filtered,
+                          ),
+                          const SizedBox(
+                            height: 10,
+                          ),
+                          SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: _filters(data.crclumcd),
+                          ),
+                        ])
+                      : Align(
+                          alignment: Alignment.center,
+                          child: SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 10),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  _choiceBox(data.crclumcd),
+                                  const SizedBox(
+                                    width: 20,
+                                  ),
+                                  SearchBox(
+                                    options: filtered,
+                                  ),
+                                  const SizedBox(
+                                    width: 20,
+                                  ),
+                                  _filters(data.crclumcd),
+                                ],
                               ),
                             ),
                           ),
-                  ),
+                        ),
                 ),
-                SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (BuildContext context, int index) => Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10),
-                      child: CourseCard(
-                        course: filtered[index],
-                      ),
+              ),
+              SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (BuildContext context, int index) => Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                    child: CourseCard(
+                      course: filtered[index],
                     ),
-                    childCount: filtered.length,
                   ),
+                  childCount: filtered.length,
                 ),
-              ],
-            ),
+              ),
+            ],
+          );
+        },
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stack) => const Center(child: Text('エラーが発生しました')));
   }

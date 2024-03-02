@@ -27,7 +27,9 @@ class _CourseCardState extends ConsumerState<CourseCard> {
   @override
   Widget build(BuildContext context) {
     final AsyncValue<UserData> asyncValue = ref.watch(userDataNotifierProvider);
-    asyncValue.when(
+    final UserDataNotifier notifier =
+        ref.watch(userDataNotifierProvider.notifier);
+    return asyncValue.when(
       data: (data) => Card(
         child: InkWell(
           onTap: () => _launchUrl(Uri(
@@ -43,27 +45,27 @@ class _CourseCardState extends ConsumerState<CourseCard> {
           child: ListTile(
               title: Text(widget.course.name),
               subtitle: Text(widget.course.category[data.crclumcd]!),
-              trailing: true
-                  ? OutlinedButton.icon(
-                      onPressed: () => setState(() {
-                        //widget.userData.removeCourse(widget.course.code);
-                      }),
-                      icon: const Icon(Icons.playlist_add_check),
-                      label: const Text('取消'),
-                    )
-                  : FilledButton.icon(
-                      onPressed: () => setState(() {
-                        //widget.userData.addCourse(widget.course.code);
-                      }),
-                      icon: const Icon(Icons.playlist_add_outlined),
-                      label: const Text('登録'),
-                    )),
+              trailing:
+                  (data.enrolledCourses?.contains(widget.course.code) ?? false)
+                      ? OutlinedButton.icon(
+                          onPressed: () => setState(() {
+                            notifier.removeCourse(widget.course.code);
+                          }),
+                          icon: const Icon(Icons.playlist_add_check),
+                          label: const Text('取消'),
+                        )
+                      : FilledButton.icon(
+                          onPressed: () => setState(() {
+                            notifier.addCourse(widget.course.code);
+                          }),
+                          icon: const Icon(Icons.playlist_add_outlined),
+                          label: const Text('登録'),
+                        )),
         ),
       ),
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, stackTrace) => Text('Error: $error'),
+      error: (error, stackTrace) => Center(child: Text('Error: $error')),
     );
-    return Container();
   }
 }
 
