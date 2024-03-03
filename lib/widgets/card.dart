@@ -44,7 +44,7 @@ class _CourseCardState extends ConsumerState<CourseCard> {
               })),
           child: ListTile(
               title: Text(widget.course.name),
-              subtitle: Text(widget.course.category[data.crclumcd]!),
+              subtitle: Text(widget.course.category[data.crclumcd] ?? ''),
               trailing:
                   (data.enrolledCourses?.contains(widget.course.code) ?? false)
                       ? OutlinedButton.icon(

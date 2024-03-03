@@ -38,8 +38,9 @@ class ChoiceBox extends StatelessWidget {
 }
 
 class SearchBox extends StatelessWidget {
-  const SearchBox({super.key, required this.options});
+  const SearchBox({super.key, required this.options, this.onChanged});
   final List<Course> options;
+  final void Function(String)? onChanged;
   @override
   Widget build(BuildContext context) {
     return SearchAnchor(
@@ -53,6 +54,7 @@ class SearchBox extends StatelessWidget {
         ),
         onChanged: (text) {
           controller.openView();
+          onChanged?.call(text);
         },
       ),
       suggestionsBuilder: (context, controller) => options

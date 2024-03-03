@@ -1,12 +1,10 @@
-import 'dart:async' show Future;
-import 'dart:convert';
-import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/user_data.dart';
 import '../widgets/filter.dart';
 import '../widgets/card.dart';
 import '../models/course.dart';
+import '../providers/course_list.dart';
 
 class ListScreen extends ConsumerStatefulWidget {
   const ListScreen({super.key});
@@ -15,8 +13,7 @@ class ListScreen extends ConsumerStatefulWidget {
 }
 
 class _ListScreenState extends ConsumerState<ListScreen> {
-  Map<String, List<Course>> courses = {};
-  List<Course> filtered = [];
+  final SearchController _searchController = SearchController();
   final List<FilterOption> grades = [
     FilterOption(name: '1'),
     FilterOption(name: '2'),
@@ -46,65 +43,6 @@ class _ListScreenState extends ConsumerState<ListScreen> {
     FilterOption(name: '選択')
   ];
 
-  @override
-  void initState() {
-    super.initState();
-    loadJson();
-  }
-
-  Future<void> loadJson() async {
-    String jsonText = await rootBundle.loadString('assets/data.json');
-    Map<String, dynamic> jsonData = await json.decode(jsonText);
-    for (String key in jsonData.keys) {
-      courses[key] = [];
-      for (var element in jsonData[key]) {
-        courses[key]!.add(Course.fromJson(element));
-      }
-    }
-  }
-
-  void filterCourse(String? crclumcd) {
-    filtered = [];
-    Map<String, List<String>> codes = {
-      '情科': [
-        's21310',
-        's21311',
-        's22210',
-        's22211',
-        's23310',
-        's23311',
-        's24310',
-        's24311'
-      ],
-      '知能': [
-        's21320',
-        's21321',
-        's22220',
-        's22221',
-        's23320',
-        's23321',
-        's24320',
-        's24321'
-      ],
-    };
-
-    if (crclumcd != null) {
-      for (String key in codes.keys) {
-        if (codes[key]!.contains(crclumcd)) {
-          for (Course course in courses[key]!) {
-            if (course.target.any((target) => crclumcd.startsWith(target))) {
-              filtered.add(course);
-            }
-          }
-          for (Course course in courses['共通']!) {
-            if (course.target.any((target) => crclumcd.startsWith(target))) {
-              filtered.add(course);
-            }
-          }
-        }
-      }
-    }
-  }
   // void filterData() {
   //   filtered = data.where((item) {
   //     if (departmentFilter.isItemSelected(item['学科']) != true) {
@@ -159,33 +97,88 @@ class _ListScreenState extends ConsumerState<ListScreen> {
   //   setState(() {});
   // }
 
-  ChoiceBox _choiceBox(String? crclumcd) {
-    return ChoiceBox(
-        options: const [
-          {'name': '情科21(一般)', 'code': 's21310'},
-          {'name': '情科21(国際)', 'code': 's21311'},
-          {'name': '情科22(一般)', 'code': 's22210'},
-          {'name': '情科22(国際)', 'code': 's22211'},
-          {'name': '情科23(一般)', 'code': 's23310'},
-          {'name': '情科23(国際)', 'code': 's23311'},
-          {'name': '情科24(一般)', 'code': 's24310'},
-          {'name': '情科24(国際)', 'code': 's24311'},
-          {'name': '知能21(一般)', 'code': 's21320'},
-          {'name': '知能21(国際)', 'code': 's21321'},
-          {'name': '知能22(一般)', 'code': 's22220'},
-          {'name': '知能22(国際)', 'code': 's22221'},
-          {'name': '知能23(一般)', 'code': 's23320'},
-          {'name': '知能23(国際)', 'code': 's23321'},
-          {'name': '知能24(一般)', 'code': 's24320'},
-          {'name': '知能24(国際)', 'code': 's24321'},
-        ],
+  ButtonTheme _choiceBox(String? crclumcd) {
+    Map<String, String> options = {
+      '情科21(一般)': 's21310',
+      '情科21(国際)': 's21311',
+      '情科22(一般)': 's22210',
+      '情科22(国際)': 's22211',
+      '情科23(一般)': 's23310',
+      '情科23(国際)': 's23311',
+      '情科24(一般)': 's24310',
+      '情科24(国際)': 's24311',
+      '知能21(一般)': 's21320',
+      '知能21(国際)': 's21321',
+      '知能22(一般)': 's22220',
+      '知能22(国際)': 's22221',
+      '知能23(一般)': 's23320',
+      '知能23(国際)': 's23321',
+      '知能24(一般)': 's24320',
+      '知能24(国際)': 's24321'
+    };
+    return ButtonTheme(
+      alignedDropdown: true,
+      child: DropdownMenu<String>(
         initialSelection: crclumcd,
-        onSelected: (code) {
-          if (code != null) {
-            ref.read(userDataNotifierProvider.notifier).setCrclumcd(code);
-            filterCourse(code);
+        menuHeight: 300,
+        onSelected: (value) {
+          if (value != null) {
+            ref.read(userDataNotifierProvider.notifier).setCrclumcd(value);
           }
-        });
+        },
+        hintText: 'カリキュラム',
+        inputDecorationTheme: const InputDecorationTheme(
+          isDense: true,
+          isCollapsed: true,
+          border: OutlineInputBorder(),
+          constraints: BoxConstraints(maxHeight: 40),
+          contentPadding: EdgeInsets.symmetric(horizontal: 8),
+        ),
+        dropdownMenuEntries: options.entries
+            .map((option) => DropdownMenuEntry<String>(
+                value: option.value, label: option.key))
+            .toList(),
+      ),
+    );
+  }
+
+  SearchAnchor _searchBox(List<Course> options) {
+    return SearchAnchor.bar(
+      searchController: _searchController,
+      onSubmitted: (value) {
+        ref.read(courseListNotifierProvider.notifier).search(value);
+        if (_searchController.isOpen) {
+          _searchController.closeView(value);
+        }
+      },
+      barHintText: '検索',
+      barTrailing: [
+        if (_searchController.text.isNotEmpty)
+          IconButton(
+              icon: const Icon(Icons.clear),
+              onPressed: () => setState(() {
+                    _searchController.clear();
+                  }))
+      ],
+      constraints: const BoxConstraints(
+        minHeight: 40,
+        maxWidth: 300,
+      ),
+      suggestionsBuilder: (context, controller) => options
+          .where((course) =>
+              course.name.toLowerCase().contains(controller.text.toLowerCase()))
+          .map((course) => ListTile(
+                title: Text(course.name),
+                onTap: () {
+                  ref
+                      .read(courseListNotifierProvider.notifier)
+                      .search(course.name);
+
+                  _searchController.closeView(course.name);
+                },
+              ))
+          .toList(),
+    );
   }
 
   Row _filters(String? crclumcd) {
@@ -196,7 +189,7 @@ class _ListScreenState extends ConsumerState<ListScreen> {
         FilterButton(
             options: grades,
             onChanged: (bool? value) {
-              filterCourse(crclumcd);
+              //filterCourse(crclumcd);
             }),
         const SizedBox(
           width: 5,
@@ -205,7 +198,7 @@ class _ListScreenState extends ConsumerState<ListScreen> {
         FilterButton(
             options: terms,
             onChanged: (bool? value) {
-              filterCourse(crclumcd);
+              //filterCourse(crclumcd);
             }),
         const SizedBox(
           width: 5,
@@ -214,7 +207,7 @@ class _ListScreenState extends ConsumerState<ListScreen> {
         FilterButton(
             options: categories,
             onChanged: (bool? value) {
-              filterCourse(crclumcd);
+              //filterCourse(crclumcd);
             }),
         const SizedBox(
           width: 5,
@@ -223,7 +216,7 @@ class _ListScreenState extends ConsumerState<ListScreen> {
         FilterButton(
             options: compulsories,
             onChanged: (bool? value) {
-              filterCourse(crclumcd);
+              //filterCourse(crclumcd);
             }),
       ],
     );
@@ -231,80 +224,81 @@ class _ListScreenState extends ConsumerState<ListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final AsyncValue<UserData> asyncValue = ref.watch(userDataNotifierProvider);
+    final AsyncValue<UserData> userDataAsyncValue =
+        ref.watch(userDataNotifierProvider);
+    final List<Course> courseList = ref.watch(courseListNotifierProvider);
     final Size screenSize = MediaQuery.of(context).size;
     final bool portrait = (screenSize.width / screenSize.height) < 1;
-    return asyncValue.when(
-        data: (data) {
-          filterCourse(data.crclumcd);
-          return CustomScrollView(
-            slivers: [
-              SliverAppBar(
-                pinned: true,
-                floating: true,
-                toolbarHeight: 0,
-                expandedHeight: portrait ? 140 : 60,
-                scrolledUnderElevation: 0,
-                flexibleSpace: FlexibleSpaceBar(
-                  background: portrait
-                      ? Column(children: [
-                          _choiceBox(data.crclumcd),
-                          const SizedBox(
-                            height: 10,
-                          ),
-                          SearchBox(
-                            options: filtered,
-                          ),
-                          const SizedBox(
-                            height: 10,
-                          ),
-                          SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
-                            child: _filters(data.crclumcd),
-                          ),
-                        ])
-                      : Align(
-                          alignment: Alignment.center,
-                          child: SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 10),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  _choiceBox(data.crclumcd),
-                                  const SizedBox(
-                                    width: 20,
-                                  ),
-                                  SearchBox(
-                                    options: filtered,
-                                  ),
-                                  const SizedBox(
-                                    width: 20,
-                                  ),
-                                  _filters(data.crclumcd),
-                                ],
+    return userDataAsyncValue.when(
+        data: (data) => CustomScrollView(
+              slivers: [
+                SliverAppBar(
+                  pinned: true,
+                  floating: true,
+                  toolbarHeight: 0,
+                  expandedHeight: portrait ? 140 : 60,
+                  scrolledUnderElevation: 0,
+                  flexibleSpace: FlexibleSpaceBar(
+                    background: portrait
+                        ? Column(children: [
+                            _choiceBox(data.crclumcd),
+                            const SizedBox(
+                              height: 10,
+                            ),
+                            _searchBox(
+                              courseList,
+                            ),
+                            const SizedBox(
+                              height: 10,
+                            ),
+                            SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: _filters(data.crclumcd),
+                            ),
+                          ])
+                        : Align(
+                            alignment: Alignment.center,
+                            child: SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 10),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    _choiceBox(data.crclumcd),
+                                    const SizedBox(
+                                      width: 20,
+                                    ),
+                                    _searchBox(
+                                      courseList,
+                                    ),
+                                    const SizedBox(
+                                      width: 20,
+                                    ),
+                                    _filters(data.crclumcd),
+                                  ],
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                ),
-              ),
-              SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (BuildContext context, int index) => Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 10),
-                    child: CourseCard(
-                      course: filtered[index],
-                    ),
                   ),
-                  childCount: filtered.length,
                 ),
-              ),
-            ],
-          );
-        },
+                SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (BuildContext context, int index) => Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      child: CourseCard(
+                        course: courseList[index],
+                      ),
+                    ),
+                    childCount: courseList.length,
+                  ),
+                ),
+              ],
+            ),
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) => const Center(child: Text('エラーが発生しました')));
+        error: (error, stack) =>
+            const Center(child: Text('ユーザーデータの取得に失敗しました')));
   }
 }
