@@ -4,7 +4,7 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/course.dart';
-import '../models/user_data.dart';
+import 'user_data_provider.dart';
 
 final courseMap =
     AsyncNotifierProvider<CourseMapNotifier, Map<String, List<Course>>>(() {

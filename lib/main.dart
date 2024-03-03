@@ -13,6 +13,7 @@ import 'package:go_router/go_router.dart';
 import 'env/env.dart';
 import 'firebase_options.dart';
 import 'models/user_data.dart';
+import 'providers/user_data_provider.dart';
 import 'screens/list.dart';
 import 'screens/table.dart';
 

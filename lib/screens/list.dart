@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../models/user_data.dart';
-import '../widgets/filter.dart';
-import '../widgets/card.dart';
 import '../models/course.dart';
-import '../providers/course_list.dart';
+import '../models/user_data.dart';
+import '../providers/course_list_provider.dart';
+import '../providers/user_data_provider.dart';
+import '../widgets/card.dart';
+import '../widgets/filter.dart';
 
 class ListScreen extends ConsumerStatefulWidget {
   const ListScreen({super.key});

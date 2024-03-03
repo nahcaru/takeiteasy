@@ -1,9 +1,10 @@
+import 'dart:async' show Future;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../models/course.dart';
 import '../models/user_data.dart';
-import 'dart:async' show Future;
+import '../providers/user_data_provider.dart';
 
 class CourseCard extends ConsumerStatefulWidget {
   const CourseCard({super.key, required this.course});
