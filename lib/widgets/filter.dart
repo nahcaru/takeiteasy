@@ -1,79 +1,15 @@
 import 'package:flutter/material.dart';
-import '../models/course.dart';
-
-class ChoiceBox extends StatelessWidget {
-  const ChoiceBox(
-      {super.key,
-      required this.options,
-      required this.initialSelection,
-      required this.onSelected});
-  final List<Map<String, String>> options;
-  final String? initialSelection;
-  final void Function(String?)? onSelected;
-  @override
-  Widget build(BuildContext context) {
-    return ButtonTheme(
-      alignedDropdown: true,
-      child: DropdownMenu<String>(
-        initialSelection: initialSelection,
-        menuHeight: 300,
-        onSelected: (value) {
-          onSelected?.call(value);
-        },
-        hintText: 'カリキュラム',
-        inputDecorationTheme: const InputDecorationTheme(
-          isDense: true,
-          isCollapsed: true,
-          border: OutlineInputBorder(),
-          constraints: BoxConstraints(maxHeight: 40),
-          contentPadding: EdgeInsets.symmetric(horizontal: 8),
-        ),
-        dropdownMenuEntries: options
-            .map((option) => DropdownMenuEntry<String>(
-                value: option['code']!, label: option['name']!))
-            .toList(),
-      ),
-    );
-  }
-}
-
-class SearchBox extends StatelessWidget {
-  const SearchBox({super.key, required this.options, this.onChanged});
-  final List<Course> options;
-  final void Function(String)? onChanged;
-  @override
-  Widget build(BuildContext context) {
-    return SearchAnchor(
-      builder: (BuildContext context, SearchController controller) => SearchBar(
-        controller: controller,
-        leading: const Icon(Icons.search),
-        hintText: '検索',
-        constraints: const BoxConstraints(
-          minHeight: 40,
-          maxWidth: 300,
-        ),
-        onChanged: (text) {
-          controller.openView();
-          onChanged?.call(text);
-        },
-      ),
-      suggestionsBuilder: (context, controller) => options
-          .where((course) => (course.name.contains(controller.text) |
-              course.code.contains(controller.text)))
-          .map((course) => ListTile(
-                title: Text(course.name),
-                onTap: () => controller.closeView(course.name),
-              ))
-          .toList(),
-    );
-  }
-}
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../providers/course_list_provider.dart';
 
 class FilterButton extends StatefulWidget {
-  const FilterButton({super.key, required this.options, this.onChanged});
-  final List<FilterOption> options;
+  const FilterButton({
+    super.key,
+    required this.items,
+    this.onChanged,
+  });
+  final Map<String, bool> items;
   final void Function(bool?)? onChanged;
-
   @override
   State<FilterButton> createState() => _FilterButtonState();
 }
@@ -90,16 +26,16 @@ class _FilterButtonState extends State<FilterButton> {
         onPressed: () =>
             controller.isOpen ? controller.close() : controller.open(),
       ),
-      menuChildren: widget.options
-          .map((option) => CheckboxListTile(
+      menuChildren: widget.items.entries
+          .map((entry) => CheckboxListTile(
                 controlAffinity: ListTileControlAffinity.leading,
-                title: Text(option.name),
-                value: option.value,
+                title: Text(entry.key),
+                value: entry.value,
                 onChanged: (bool? value) {
                   setState(() {
-                    option.value = value!;
+                    widget.items[entry.key] = value!;
                   });
-                  widget.onChanged?.call(value);
+                  widget.onChanged!(value);
                 },
               ))
           .toList(),
@@ -107,8 +43,103 @@ class _FilterButtonState extends State<FilterButton> {
   }
 }
 
-class FilterOption {
-  String name;
-  bool value;
-  FilterOption({required this.name, this.value = true});
+class Filters extends ConsumerWidget {
+  const Filters({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final Map<String, bool> grades = {
+      '1': true,
+      '2': true,
+      '3': true,
+      '4': true
+    };
+    final Map<String, bool> terms = {
+      '後期前': true,
+      '後期後': true,
+      '後期': true,
+      '後集中': true,
+      '通年': true
+    };
+    final Map<String, bool> categories = {
+      '教養': true,
+      '体育': true,
+      '外国語': true,
+      'PBL': true,
+      '情報工学基盤': true,
+      '専門': true,
+      '教職': true,
+      'その他': true
+    };
+    final Map<String, bool> compulsorinesses = {
+      '必修': true,
+      '選択必修': true,
+      '選択': true
+    };
+    final CourseListNotifier notifier =
+        ref.read(courseListNotifierProvider.notifier);
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const Text('学年'),
+        FilterButton(
+            items: grades,
+            onChanged: (bool? value) {
+              notifier.filter(
+                grades: grades,
+                terms: terms,
+                categories: categories,
+                compulsorinesses: compulsorinesses,
+              );
+            }),
+        const SizedBox(
+          width: 5,
+        ),
+        const Text('学期'),
+        FilterButton(
+          items: terms,
+          onChanged: (bool? value) {
+            notifier.filter(
+              grades: grades,
+              terms: terms,
+              categories: categories,
+              compulsorinesses: compulsorinesses,
+            );
+          },
+        ),
+        const SizedBox(
+          width: 5,
+        ),
+        const Text('分類'),
+        FilterButton(
+          items: categories,
+          onChanged: (bool? value) {
+            notifier.filter(
+              grades: grades,
+              terms: terms,
+              categories: categories,
+              compulsorinesses: compulsorinesses,
+            );
+          },
+        ),
+        const SizedBox(
+          width: 5,
+        ),
+        const Text('必修'),
+        FilterButton(
+          items: compulsorinesses,
+          onChanged: (bool? value) {
+            notifier.filter(
+              grades: grades,
+              terms: terms,
+              categories: categories,
+              compulsorinesses: compulsorinesses,
+            );
+          },
+        ),
+      ],
+    );
+  }
 }

@@ -15,88 +15,6 @@ class ListScreen extends ConsumerStatefulWidget {
 
 class _ListScreenState extends ConsumerState<ListScreen> {
   final SearchController _searchController = SearchController();
-  final List<FilterOption> grades = [
-    FilterOption(name: '1'),
-    FilterOption(name: '2'),
-    FilterOption(name: '3'),
-    FilterOption(name: '4')
-  ];
-  final List<FilterOption> terms = [
-    FilterOption(name: '後期前'),
-    FilterOption(name: '後期後'),
-    FilterOption(name: '後期'),
-    FilterOption(name: '後集中'),
-    FilterOption(name: '通年')
-  ];
-  final List<FilterOption> categories = [
-    FilterOption(name: '教養'),
-    FilterOption(name: '体育'),
-    FilterOption(name: '外国語'),
-    FilterOption(name: 'PBL'),
-    FilterOption(name: '情報工学基盤'),
-    FilterOption(name: '専門'),
-    FilterOption(name: '教職'),
-    FilterOption(name: 'その他')
-  ];
-  final List<FilterOption> compulsories = [
-    FilterOption(name: '必修'),
-    FilterOption(name: '選択必修'),
-    FilterOption(name: '選択')
-  ];
-
-  // void filterData() {
-  //   filtered = data.where((item) {
-  //     if (departmentFilter.isItemSelected(item['学科']) != true) {
-  //       return false;
-  //     }
-  //     if (areGradesSelected[grades.indexOf(item['年'].toString())] != true) {
-  //       return false;
-  //     }
-  //     if (item['学期'] != '') {
-  //       if (areTermsSelected[terms.indexOf(item['学期'])] != true) {
-  //         return false;
-  //       }
-  //     }
-  //     bool matched = false;
-  //     for (int i = 0; i < categories.length - 1; i++) {
-  //       if (item['分類'].toString().contains(categories[i])) {
-  //         matched = true;
-  //         if (!areCategoriesSelected[i]) {
-  //           return false;
-  //         }
-  //       }
-  //     }
-  //     if (!areCategoriesSelected.last) {
-  //       if (!matched) {
-  //         return false;
-  //       }
-  //     }
-
-  //     matched = false;
-  //     for (int i = compulsories.length - 2; 0 <= i; i--) {
-  //       if (item['分類'].toString().contains(compulsories[i])) {
-  //         matched = true;
-  //         if (!areCompulsoriesSelected[i]) {
-  //           return false;
-  //         }
-  //       }
-  //     }
-  //     if (!areCompulsoriesSelected.last) {
-  //       if (!matched) {
-  //         return false;
-  //       }
-  //     }
-
-  //     if (!item['科目名']
-  //         .toLowerCase()
-  //         .toString()
-  //         .contains(_searchController.text.toLowerCase())) {
-  //       return false;
-  //     }
-  //     return true;
-  //   }).toList();
-  //   setState(() {});
-  // }
 
   ButtonTheme _choiceBox(String? crclumcd) {
     Map<String, String> options = {
@@ -182,47 +100,6 @@ class _ListScreenState extends ConsumerState<ListScreen> {
     );
   }
 
-  Row _filters(String? crclumcd) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        const Text('学年'),
-        FilterButton(
-            options: grades,
-            onChanged: (bool? value) {
-              //filterCourse(crclumcd);
-            }),
-        const SizedBox(
-          width: 5,
-        ),
-        const Text('学期'),
-        FilterButton(
-            options: terms,
-            onChanged: (bool? value) {
-              //filterCourse(crclumcd);
-            }),
-        const SizedBox(
-          width: 5,
-        ),
-        const Text('分類'),
-        FilterButton(
-            options: categories,
-            onChanged: (bool? value) {
-              //filterCourse(crclumcd);
-            }),
-        const SizedBox(
-          width: 5,
-        ),
-        const Text('必選'),
-        FilterButton(
-            options: compulsories,
-            onChanged: (bool? value) {
-              //filterCourse(crclumcd);
-            }),
-      ],
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final AsyncValue<UserData> userDataAsyncValue =
@@ -252,9 +129,9 @@ class _ListScreenState extends ConsumerState<ListScreen> {
                             const SizedBox(
                               height: 10,
                             ),
-                            SingleChildScrollView(
+                            const SingleChildScrollView(
                               scrollDirection: Axis.horizontal,
-                              child: _filters(data.crclumcd),
+                              child: Filters(),
                             ),
                           ])
                         : Align(
@@ -277,7 +154,7 @@ class _ListScreenState extends ConsumerState<ListScreen> {
                                     const SizedBox(
                                       width: 20,
                                     ),
-                                    _filters(data.crclumcd),
+                                    const Filters(),
                                   ],
                                 ),
                               ),

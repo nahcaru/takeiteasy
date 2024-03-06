@@ -12,7 +12,7 @@ class Course {
   final String altName;
   final List<String> altTarget;
   final Map<String, String> category;
-  final Map<String, String> compulsory;
+  final Map<String, String> compulsoriness;
   final Map<String, double> credits;
 
   Course.fromJson(Map<String, dynamic> json)
@@ -29,6 +29,6 @@ class Course {
         altName = json['altName'],
         altTarget = List.from(json['altTarget']),
         category = Map.from(json['category']),
-        compulsory = Map.from(json['compulsory']),
+        compulsoriness = Map.from(json['compulsory']),
         credits = Map.from(json['credits']);
 }

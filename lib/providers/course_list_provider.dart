@@ -86,4 +86,24 @@ class CourseListNotifier extends Notifier<List<Course>> {
             (course) => course.name.toLowerCase().contains(text.toLowerCase()))
         .toList();
   }
+
+  void filter({
+    required Map<String, bool> grades,
+    required Map<String, bool> terms,
+    required Map<String, bool> categories,
+    required Map<String, bool> compulsorinesses,
+  }) {
+    state = _courseList.where((course) {
+      bool gradeFilter = grades[course.grade.toString()] ?? false;
+      bool termFilter = terms[course.term] ?? false;
+      String? crclumcd = ref.watch(userDataNotifierProvider).value?.crclumcd;
+      bool categoryFilter = categories[course.category[crclumcd]] ?? false;
+      bool compulsorinessFilter =
+          compulsorinesses[course.compulsoriness[crclumcd]] ?? false;
+      return gradeFilter &&
+          termFilter &&
+          categoryFilter &&
+          compulsorinessFilter;
+    }).toList();
+  }
 }
