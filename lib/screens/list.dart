@@ -106,18 +106,20 @@ class _ListScreenState extends ConsumerState<ListScreen> {
         ref.watch(userDataNotifierProvider);
     final List<Course> courseList = ref.watch(courseListNotifierProvider);
     final Size screenSize = MediaQuery.of(context).size;
-    final bool portrait = (screenSize.width / screenSize.height) < 1;
+    final bool isPortrait = (screenSize.width / screenSize.height) < 1;
     return userDataAsyncValue.when(
-        data: (data) => CustomScrollView(
-              slivers: [
+        data: (data) => NestedScrollView(
+              floatHeaderSlivers: true,
+              headerSliverBuilder:
+                  (BuildContext context, bool innerBoxIsScrolled) => [
                 SliverAppBar(
                   pinned: true,
                   floating: true,
                   toolbarHeight: 0,
-                  expandedHeight: portrait ? 140 : 60,
+                  expandedHeight: isPortrait ? 140 : 60,
                   scrolledUnderElevation: 0,
                   flexibleSpace: FlexibleSpaceBar(
-                    background: portrait
+                    background: isPortrait
                         ? Column(children: [
                             _choiceBox(data.crclumcd),
                             const SizedBox(
@@ -131,7 +133,7 @@ class _ListScreenState extends ConsumerState<ListScreen> {
                             ),
                             const SingleChildScrollView(
                               scrollDirection: Axis.horizontal,
-                              child: Filters(),
+                              child: Filters(isPortrait: true),
                             ),
                           ])
                         : Align(
@@ -151,10 +153,6 @@ class _ListScreenState extends ConsumerState<ListScreen> {
                                     _searchBox(
                                       courseList,
                                     ),
-                                    const SizedBox(
-                                      width: 20,
-                                    ),
-                                    const Filters(),
                                   ],
                                 ),
                               ),
@@ -162,18 +160,29 @@ class _ListScreenState extends ConsumerState<ListScreen> {
                           ),
                   ),
                 ),
-                SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (BuildContext context, int index) => Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10),
-                      child: CourseCard(
-                        course: courseList[index],
-                      ),
-                    ),
-                    childCount: courseList.length,
-                  ),
-                ),
               ],
+              body: Row(
+                children: [
+                  if (!isPortrait)
+                    const Row(
+                      children: [
+                        SizedBox(
+                            width: 200,
+                            child: SingleChildScrollView(
+                                child: Filters(isPortrait: false))),
+                        VerticalDivider(
+                          width: 0,
+                        ),
+                      ],
+                    ),
+                  ListView.builder(
+                    itemCount: courseList.length,
+                    itemBuilder: (BuildContext context, index) {
+                      return CourseCard(course: courseList[index]);
+                    },
+                  ),
+                ],
+              ),
             ),
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stack) =>

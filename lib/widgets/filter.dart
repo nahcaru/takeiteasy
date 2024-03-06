@@ -5,9 +5,11 @@ import '../providers/course_list_provider.dart';
 class FilterButton extends StatefulWidget {
   const FilterButton({
     super.key,
+    required this.title,
     required this.items,
     this.onChanged,
   });
+  final String title;
   final Map<String, bool> items;
   final void Function(bool?)? onChanged;
   @override
@@ -21,7 +23,7 @@ class _FilterButtonState extends State<FilterButton> {
       builder:
           (BuildContext context, MenuController controller, Widget? child) =>
               IconButton(
-        tooltip: 'フィルター',
+        tooltip: '${widget.title}で絞り込む',
         icon: const Icon(Icons.filter_alt_outlined),
         onPressed: () =>
             controller.isOpen ? controller.close() : controller.open(),
@@ -46,7 +48,9 @@ class _FilterButtonState extends State<FilterButton> {
 class Filters extends ConsumerWidget {
   const Filters({
     super.key,
+    required this.isPortrait,
   });
+  final bool isPortrait;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -78,68 +82,97 @@ class Filters extends ConsumerWidget {
       '選択必修': true,
       '選択': true
     };
+    final Map<String, Map<String, bool>> items = {
+      '学年': grades,
+      '学期': terms,
+      '分類': categories,
+      '必選': compulsorinesses
+    };
     final CourseListNotifier notifier =
         ref.read(courseListNotifierProvider.notifier);
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        const Text('学年'),
-        FilterButton(
-            items: grades,
-            onChanged: (bool? value) {
-              notifier.filter(
-                grades: grades,
-                terms: terms,
-                categories: categories,
-                compulsorinesses: compulsorinesses,
-              );
-            }),
-        const SizedBox(
-          width: 5,
-        ),
-        const Text('学期'),
-        FilterButton(
-          items: terms,
-          onChanged: (bool? value) {
-            notifier.filter(
-              grades: grades,
-              terms: terms,
-              categories: categories,
-              compulsorinesses: compulsorinesses,
-            );
-          },
-        ),
-        const SizedBox(
-          width: 5,
-        ),
-        const Text('分類'),
-        FilterButton(
-          items: categories,
-          onChanged: (bool? value) {
-            notifier.filter(
-              grades: grades,
-              terms: terms,
-              categories: categories,
-              compulsorinesses: compulsorinesses,
-            );
-          },
-        ),
-        const SizedBox(
-          width: 5,
-        ),
-        const Text('必修'),
-        FilterButton(
-          items: compulsorinesses,
-          onChanged: (bool? value) {
-            notifier.filter(
-              grades: grades,
-              terms: terms,
-              categories: categories,
-              compulsorinesses: compulsorinesses,
-            );
-          },
-        ),
-      ],
+
+    return isPortrait
+        ? Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: items.entries
+                .map(
+                  (entry) => Row(
+                    children: [
+                      Text(entry.key),
+                      FilterButton(
+                          title: entry.key,
+                          items: entry.value,
+                          onChanged: (bool? value) {
+                            notifier.filter(
+                              grades: grades,
+                              terms: terms,
+                              categories: categories,
+                              compulsorinesses: compulsorinesses,
+                            );
+                          }),
+                    ],
+                  ),
+                )
+                .toList(),
+          )
+        : Column(
+            children: items.entries
+                .map((entry) => FilterTile(
+                      title: entry.key,
+                      items: entry.value,
+                      onChanged: (bool? value) {
+                        notifier.filter(
+                          grades: grades,
+                          terms: terms,
+                          categories: categories,
+                          compulsorinesses: compulsorinesses,
+                        );
+                      },
+                    ))
+                .toList(),
+          );
+  }
+}
+
+class FilterTile extends StatefulWidget {
+  const FilterTile({
+    super.key,
+    required this.title,
+    required this.items,
+    this.onChanged,
+  });
+  final String title;
+  final Map<String, bool> items;
+  final void Function(bool?)? onChanged;
+  @override
+  State<FilterTile> createState() => _FilterTileState();
+}
+
+class _FilterTileState extends State<FilterTile> {
+  @override
+  Widget build(BuildContext context) {
+    return ExpansionTile(
+      initiallyExpanded: true,
+      dense: true,
+      shape: const Border(
+        top: BorderSide(color: Colors.transparent),
+        bottom: BorderSide(color: Colors.transparent),
+      ),
+      title: Text('${widget.title}で絞り込む'),
+      children: widget.items.entries
+          .map((entry) => CheckboxListTile(
+                dense: true,
+                controlAffinity: ListTileControlAffinity.leading,
+                title: Text(entry.key),
+                value: entry.value,
+                onChanged: (bool? value) {
+                  setState(() {
+                    widget.items[entry.key] = value!;
+                  });
+                  widget.onChanged!(value);
+                },
+              ))
+          .toList(),
     );
   }
 }
