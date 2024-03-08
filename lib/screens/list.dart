@@ -92,7 +92,6 @@ class _ListScreenState extends ConsumerState<ListScreen> {
                   ref
                       .read(courseListNotifierProvider.notifier)
                       .search(course.name);
-
                   _searchController.closeView(course.name);
                 },
               ))
@@ -109,7 +108,7 @@ class _ListScreenState extends ConsumerState<ListScreen> {
     final bool isPortrait = (screenSize.width / screenSize.height) < 1;
     return userDataAsyncValue.when(
         data: (data) => NestedScrollView(
-              floatHeaderSlivers: true,
+              //floatHeaderSlivers: true,
               headerSliverBuilder:
                   (BuildContext context, bool innerBoxIsScrolled) => [
                 SliverAppBar(
@@ -168,18 +167,25 @@ class _ListScreenState extends ConsumerState<ListScreen> {
                       children: [
                         SizedBox(
                             width: 200,
-                            child: SingleChildScrollView(
-                                child: Filters(isPortrait: false))),
+                            child: Align(
+                              alignment: Alignment.topCenter,
+                              child: SingleChildScrollView(
+                                  primary: false,
+                                  child: Filters(isPortrait: false)),
+                            )),
                         VerticalDivider(
                           width: 0,
                         ),
                       ],
                     ),
-                  ListView.builder(
-                    itemCount: courseList.length,
-                    itemBuilder: (BuildContext context, index) {
-                      return CourseCard(course: courseList[index]);
-                    },
+                  Expanded(
+                    child: ListView.builder(
+                      primary: false,
+                      itemCount: courseList.length,
+                      itemBuilder: (BuildContext context, index) {
+                        return CourseCard(course: courseList[index]);
+                      },
+                    ),
                   ),
                 ],
               ),
