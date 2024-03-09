@@ -147,16 +147,16 @@ class _HomePageState extends ConsumerState<HomePage> {
   }
 
   void setThemeMode(int themeModeIndex) {
-    ref.watch(userDataNotifierProvider.notifier).setThemeMode(themeModeIndex);
+    ref.read(userDataNotifierProvider.notifier).setThemeMode(themeModeIndex);
   }
 
   @override
   Widget build(BuildContext context) {
     final Size screenSize = MediaQuery.of(context).size;
-    final bool portrait = (screenSize.width / screenSize.height) < 1;
+    final bool isPortrait = (screenSize.width / screenSize.height) < 1;
     final bool loggedIn = ref.watch(authProvider).currentUser != null;
     return Scaffold(
-      appBar: portrait
+      appBar: isPortrait
           ? AppBar(
               scrolledUnderElevation: 0,
               centerTitle: false,
@@ -200,7 +200,7 @@ class _HomePageState extends ConsumerState<HomePage> {
               ],
             )
           : null,
-      bottomNavigationBar: portrait
+      bottomNavigationBar: isPortrait
           ? NavigationBar(
               onDestinationSelected: (int index) => setState(() {
                 currentPageIndex = index;
@@ -220,7 +220,7 @@ class _HomePageState extends ConsumerState<HomePage> {
           : null,
       body: Row(
         children: [
-          if (!portrait)
+          if (!isPortrait)
             MouseRegion(
               onEnter: (_) => setState(() => extended = true),
               onExit: (_) => setState(() => extended = false),
@@ -389,7 +389,7 @@ class NavigationRailExpanded extends StatelessWidget {
       animation: animation,
       builder: (BuildContext context, Widget? c) {
         return SizedBox(
-          width: 80 + lerpDouble(0, 256 - 80, animation.value)!,
+          width: lerpDouble(80, 256, animation.value)!,
           height: height,
           child: child,
         );

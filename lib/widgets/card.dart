@@ -43,25 +43,77 @@ class _CourseCardState extends ConsumerState<CourseCard> {
                 'value(kougicd)': widget.course.code,
                 'value(crclumcd)': data.crclumcd,
               })),
-          child: ListTile(
-              title: Text(widget.course.name),
-              subtitle: Text(widget.course.category[data.crclumcd] ?? ''),
-              trailing:
-                  (data.enrolledCourses?.contains(widget.course.code) ?? false)
-                      ? OutlinedButton.icon(
-                          onPressed: () => setState(() {
-                            notifier.removeCourse(widget.course.code);
-                          }),
-                          icon: const Icon(Icons.playlist_add_check),
-                          label: const Text('取消'),
+          child: Padding(
+              padding: const EdgeInsets.all(8),
+              child: Row(
+                children: [
+                  SizedBox(
+                    width: 100,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          widget.course.term,
+                        ),
+                        Row(
+                          children: widget.course.period
+                              .map((String period) => Text(period))
+                              .toList(),
                         )
-                      : FilledButton.icon(
-                          onPressed: () => setState(() {
-                            notifier.addCourse(widget.course.code);
-                          }),
-                          icon: const Icon(Icons.playlist_add_outlined),
-                          label: const Text('登録'),
+                      ],
+                    ),
+                  ),
+                  Expanded(
+                    child: Text(widget.course.name,
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.primary,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
                         )),
+                  ),
+                  SizedBox(
+                    width: 200,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          widget.course.category[data.crclumcd] ?? '',
+                        ),
+                        Text(
+                          widget.course.compulsoriness[data.crclumcd] ?? '',
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(
+                    width: 100,
+                    child: Text(
+                      '${widget.course.credits[data.crclumcd] ?? '-'}単位',
+                    ),
+                  ),
+                  Expanded(
+                      child: Align(
+                    alignment: Alignment.centerRight,
+                    child:
+                        (data.enrolledCourses?.contains(widget.course.code) ??
+                                false)
+                            ? OutlinedButton.icon(
+                                onPressed: () => setState(() {
+                                  notifier.removeCourse(widget.course.code);
+                                }),
+                                icon: const Icon(Icons.playlist_add_check),
+                                label: const Text('取消'),
+                              )
+                            : FilledButton.icon(
+                                onPressed: () => setState(() {
+                                  notifier.addCourse(widget.course.code);
+                                }),
+                                icon: const Icon(Icons.playlist_add_outlined),
+                                label: const Text('登録'),
+                              ),
+                  )),
+                ],
+              )),
         ),
       ),
       loading: () => const Center(child: CircularProgressIndicator()),

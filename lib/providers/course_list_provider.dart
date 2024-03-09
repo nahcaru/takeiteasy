@@ -77,7 +77,36 @@ class CourseListNotifier extends Notifier<List<Course>> {
         }
       }
     }
-    return _courseList;
+    return sortPeriods(_courseList);
+  }
+
+  List<Course> sortPeriods(List<Course> instances) {
+    final daysOrder = ['月', '火', '水', '木', '金', '土', '日', ''];
+    instances.sort((a, b) {
+      String aPeriod = a.period.firstOrNull ?? '';
+      String bPeriod = b.period.firstOrNull ?? '';
+      if (aPeriod == '' && bPeriod == '') {
+        return 0;
+      } else if (aPeriod == '') {
+        return 1;
+      } else if (bPeriod == '') {
+        return -1;
+      } else {
+        String aDay = aPeriod[0];
+        String bDay = bPeriod[0];
+        int dayComparison =
+            daysOrder.indexOf(aDay).compareTo(daysOrder.indexOf(bDay));
+        if (dayComparison != 0) {
+          return dayComparison;
+        } else {
+          int aTime = int.tryParse(aPeriod[1]) ?? 0;
+          int bTime = int.tryParse(bPeriod[1]) ?? 0;
+          return aTime.compareTo(bTime);
+        }
+      }
+    });
+
+    return instances;
   }
 
   void search(String text) {
