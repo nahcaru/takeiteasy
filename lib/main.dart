@@ -153,7 +153,7 @@ class _HomePageState extends ConsumerState<HomePage> {
   @override
   Widget build(BuildContext context) {
     final Size screenSize = MediaQuery.of(context).size;
-    final bool isPortrait = (screenSize.width / screenSize.height) < 1;
+    final bool isPortrait = ((screenSize.width - 80) / screenSize.height) < 1;
     final bool loggedIn = ref.watch(authProvider).currentUser != null;
     return Scaffold(
       appBar: isPortrait

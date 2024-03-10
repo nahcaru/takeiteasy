@@ -8,6 +8,7 @@ class Course {
   final String code;
   final List<String> room;
   final List<String> target;
+  final String note;
   final bool early;
   final String altName;
   final List<String> altTarget;
@@ -25,6 +26,7 @@ class Course {
         code = json['code'],
         room = List.from(json['room']),
         target = List.from(json['target']),
+        note = json['note'],
         early = json['early'],
         altName = json['altName'],
         altTarget = List.from(json['altTarget']),

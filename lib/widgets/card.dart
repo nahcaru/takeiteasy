@@ -30,6 +30,8 @@ class _CourseCardState extends ConsumerState<CourseCard> {
     final AsyncValue<UserData> asyncValue = ref.watch(userDataNotifierProvider);
     final UserDataNotifier notifier =
         ref.watch(userDataNotifierProvider.notifier);
+    final Size screenSize = MediaQuery.of(context).size;
+    final bool isPortrait = ((screenSize.width - 280) / screenSize.height) < 1;
     return asyncValue.when(
       data: (data) => Card(
         child: InkWell(
@@ -48,31 +50,51 @@ class _CourseCardState extends ConsumerState<CourseCard> {
               child: Row(
                 children: [
                   SizedBox(
-                    width: 100,
+                    width: 60,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           widget.course.term,
                         ),
-                        Row(
-                          children: widget.course.period
-                              .map((String period) => Text(period))
-                              .toList(),
+                        Text(
+                          widget.course.period.join(','),
                         )
                       ],
                     ),
                   ),
+                  const SizedBox(
+                    width: 10,
+                  ),
+                  Flexible(flex: 1, child: Container()),
                   Expanded(
-                    child: Text(widget.course.name,
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.primary,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        )),
+                    flex: 9,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          widget.course.class_,
+                          style: const TextStyle(
+                            fontSize: 12,
+                          ),
+                        ),
+                        Text(widget.course.name,
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.primary,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            )),
+                        Text(
+                          widget.course.note,
+                          style: const TextStyle(
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                   SizedBox(
-                    width: 200,
+                    width: 100,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -86,32 +108,47 @@ class _CourseCardState extends ConsumerState<CourseCard> {
                     ),
                   ),
                   SizedBox(
-                    width: 100,
-                    child: Text(
-                      '${widget.course.credits[data.crclumcd] ?? '-'}単位',
+                    width: 60,
+                    child: Align(
+                      alignment: Alignment.centerRight,
+                      child: Text(
+                        '${widget.course.credits[data.crclumcd] ?? '-'}単位',
+                      ),
                     ),
                   ),
-                  Expanded(
-                      child: Align(
-                    alignment: Alignment.centerRight,
-                    child:
-                        (data.enrolledCourses?.contains(widget.course.code) ??
-                                false)
-                            ? OutlinedButton.icon(
-                                onPressed: () => setState(() {
-                                  notifier.removeCourse(widget.course.code);
-                                }),
-                                icon: const Icon(Icons.playlist_add_check),
-                                label: const Text('取消'),
-                              )
-                            : FilledButton.icon(
-                                onPressed: () => setState(() {
-                                  notifier.addCourse(widget.course.code);
-                                }),
-                                icon: const Icon(Icons.playlist_add_outlined),
-                                label: const Text('登録'),
-                              ),
-                  )),
+                  Flexible(flex: 1, child: Container()),
+                  const SizedBox(
+                    width: 10,
+                  ),
+                  (data.enrolledCourses?.contains(widget.course.code) ?? false)
+                      ? isPortrait
+                          ? IconButton.outlined(
+                              onPressed: () => setState(() {
+                                notifier.removeCourse(widget.course.code);
+                              }),
+                              icon: const Icon(Icons.playlist_add_check),
+                            )
+                          : OutlinedButton.icon(
+                              onPressed: () => setState(() {
+                                notifier.removeCourse(widget.course.code);
+                              }),
+                              icon: const Icon(Icons.playlist_add_check),
+                              label: const Text('取消'),
+                            )
+                      : isPortrait
+                          ? IconButton.filled(
+                              onPressed: () => setState(() {
+                                notifier.addCourse(widget.course.code);
+                              }),
+                              icon: const Icon(Icons.playlist_add_outlined),
+                            )
+                          : FilledButton.icon(
+                              onPressed: () => setState(() {
+                                notifier.addCourse(widget.course.code);
+                              }),
+                              icon: const Icon(Icons.playlist_add_outlined),
+                              label: const Text('登録'),
+                            ),
                 ],
               )),
         ),
@@ -121,266 +158,3 @@ class _CourseCardState extends ConsumerState<CourseCard> {
     );
   }
 }
-
-//   child: ListView.builder(
-                //     itemCount: filtered.length,
-                //     itemBuilder: (context, index) {
-                //       Map<String, dynamic> item = filtered[index];
-                //       String info = (item['クラス'] + ' ' + item['備考']).trim();
-                //       return InkWell(
-                //         onTap: () {
-                //           showDialog(
-                //             context: context,
-                //             builder: (BuildContext context) {
-                //               return AlertDialog(
-                //                 title: SelectionArea(
-                //                   child: (info == '')
-                //                       ? Text(item['科目名'])
-                //                       : Text('($info) ${item['科目名']}'),
-                //                 ),
-                //                 content: SelectionArea(
-                //                   child: Row(
-                //                     mainAxisAlignment: MainAxisAlignment.start,
-                //                     children: [
-                //                       Text(
-                //                           '講義コード\n${item['講義コード']}\n\n教室\n${item['教室']}\n\n担当者\n${item['担当者']}'),
-                //                     ],
-                //                   ),
-                //                 ),
-                //                 scrollable: true,
-                //               );
-                //             },
-                //           );
-                //         },
-                //         child: Card(
-                //           child: Container(
-                //             padding: const EdgeInsets.all(5),
-                //             child: Column(
-                //               children: [
-                //                 if (ratio < 1)
-                //                   DefaultTextStyle.merge(
-                //                     style: const TextStyle(fontSize: 12),
-                //                     child: Row(
-                //                       children: [
-                //                         const SizedBox(
-                //                           width: 5,
-                //                         ),
-                //                         Text(item['学科']),
-                //                         const SizedBox(
-                //                           width: 5,
-                //                         ),
-                //                         Text('${item['年']}年'),
-                //                         const SizedBox(
-                //                           width: 5,
-                //                         ),
-                //                         Text(item['学期']),
-                //                         const SizedBox(
-                //                           width: 5,
-                //                         ),
-                //                         Text(item['時限']),
-                //                         const SizedBox(
-                //                           width: 5,
-                //                         ),
-                //                         if (info != '')
-                //                           FittedBox(
-                //                             fit: BoxFit.scaleDown,
-                //                             child: Text(
-                //                               info,
-                //                             ),
-                //                           ),
-                //                       ],
-                //                     ),
-                //                   ),
-                //                 Row(
-                //                   children: [
-                //                     tookClasses.contains(item['講義コード'])
-                //                         ? IconButton(
-                //                             icon: Icon(Icons.library_add_check,
-                //                                 color: Theme.of(context)
-                //                                             .brightness ==
-                //                                         Brightness.dark
-                //                                     ? Colors.white
-                //                                     : Colors.black),
-                //                             onPressed: () async {
-                //                               setState(() {
-                //                                 tookClasses
-                //                                     .remove(item['講義コード']);
-                //                               });
-                //                               User? user = FirebaseAuth
-                //                                   .instance.currentUser;
-                //                               if (user != null) {
-                //                                 await FirebaseFirestore.instance
-                //                                     .collection('users')
-                //                                     .doc(user.uid)
-                //                                     .set({
-                //                                   'tookClasses': tookClasses
-                //                                 });
-                //                               }
-                //                             },
-                //                           )
-                //                         : IconButton(
-                //                             icon: const Icon(
-                //                                 Icons.library_add_outlined,
-                //                                 color: Colors.blueAccent),
-                //                             onPressed: () async {
-                //                               setState(() {
-                //                                 tookClasses.add(item['講義コード']);
-                //                               });
-                //                               User? user = FirebaseAuth
-                //                                   .instance.currentUser;
-                //                               if (user != null) {
-                //                                 await FirebaseFirestore.instance
-                //                                     .collection('users')
-                //                                     .doc(user.uid)
-                //                                     .set({
-                //                                   'tookClasses': tookClasses
-                //                                 });
-                //                               }
-                //                             },
-                //                           ),
-                //                     if (1 <= ratio)
-                //                       Expanded(
-                //                         flex: 1,
-                //                         child: Column(
-                //                           mainAxisAlignment:
-                //                               MainAxisAlignment.center,
-                //                           children: [
-                //                             Text(item['学科']),
-                //                             Text('${item['年']}年'),
-                //                           ],
-                //                         ),
-                //                       ),
-                //                     if (1 <= ratio)
-                //                       Expanded(
-                //                         flex: 3,
-                //                         child: Column(
-                //                           mainAxisAlignment:
-                //                               MainAxisAlignment.center,
-                //                           children: [
-                //                             Text(item['学期']),
-                //                             Text(item['時限']),
-                //                           ],
-                //                         ),
-                //                       ),
-                //                     Expanded(
-                //                       flex: 8,
-                //                       child: (ratio < 1)
-                //                           ? FittedBox(
-                //                               fit: BoxFit.scaleDown,
-                //                               alignment: Alignment.centerLeft,
-                //                               child: Text.rich(TextSpan(
-                //                                 text: item['科目名'],
-                //                                 style: const TextStyle(
-                //                                   color: Colors.blueAccent,
-                //                                   fontSize: 18,
-                //                                 ),
-                //                                 recognizer:
-                //                                     TapGestureRecognizer()
-                //                                       ..onTap = () {
-                //                                         launchUrl(Uri.parse(
-                //                                             urlString +
-                //                                                 item['講義コード']));
-                //                                       },
-                //                               )),
-                //                             )
-                //                           : Column(
-                //                               mainAxisAlignment:
-                //                                   MainAxisAlignment.center,
-                //                               crossAxisAlignment:
-                //                                   CrossAxisAlignment.start,
-                //                               children: [
-                //                                 if (info != '')
-                //                                   FittedBox(
-                //                                     fit: BoxFit.scaleDown,
-                //                                     child: Text(
-                //                                       info,
-                //                                       style: const TextStyle(
-                //                                         fontSize: 12,
-                //                                       ),
-                //                                     ),
-                //                                   ),
-                //                                 Text.rich(TextSpan(
-                //                                   text: item['科目名'],
-                //                                   style: const TextStyle(
-                //                                     color: Colors.blueAccent,
-                //                                     fontSize: 18,
-                //                                   ),
-                //                                   recognizer:
-                //                                       TapGestureRecognizer()
-                //                                         ..onTap = () {
-                //                                           launchUrl(Uri.parse(
-                //                                               urlString +
-                //                                                   item[
-                //                                                       '講義コード']));
-                //                                         },
-                //                                 )),
-                //                                 if (item['受講対象/再履修者科目名'] != '')
-                //                                   FittedBox(
-                //                                     fit: BoxFit.scaleDown,
-                //                                     child: Text(
-                //                                       item['受講対象/再履修者科目名'],
-                //                                       style: const TextStyle(
-                //                                         fontSize: 12,
-                //                                       ),
-                //                                     ),
-                //                                   ),
-                //                               ],
-                //                             ),
-                //                     ),
-                //                     Expanded(
-                //                       flex: 4,
-                //                       child: Column(
-                //                         mainAxisAlignment:
-                //                             MainAxisAlignment.center,
-                //                         children: [
-                //                           FittedBox(
-                //                             fit: BoxFit.scaleDown,
-                //                             child: Text(
-                //                               item['分類'] + ' ',
-                //                             ),
-                //                           ),
-                //                           Text('${item['単位数']}単位'),
-                //                         ],
-                //                       ),
-                //                     ),
-                //                     if (1 <= ratio)
-                //                       Expanded(
-                //                           flex: 12,
-                //                           child: Text(
-                //                             item['概要'],
-                //                             overflow: TextOverflow.ellipsis,
-                //                             maxLines: 4,
-                //                             style: const TextStyle(
-                //                               fontSize: 10,
-                //                             ),
-                //                           )),
-                //                   ],
-                //                 ),
-                //                 if (ratio < 1 && item['受講対象/再履修者科目名'] != '')
-                //                   Row(
-                //                     children: [
-                //                       Expanded(
-                //                         child: FittedBox(
-                //                           fit: BoxFit.scaleDown,
-                //                           alignment: Alignment.centerLeft,
-                //                           child: Padding(
-                //                             padding: const EdgeInsets.symmetric(
-                //                                 horizontal: 5),
-                //                             child: Text(
-                //                               item['受講対象/再履修者科目名'],
-                //                               style:
-                //                                   const TextStyle(fontSize: 12),
-                //                             ),
-                //                           ),
-                //                         ),
-                //                       ),
-                //                     ],
-                //                   ),
-                //               ],
-                //             ),
-                //           ),
-                //         ),
-                //       );
-                //     },
-                //   ),
-                // ),

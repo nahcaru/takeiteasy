@@ -61,7 +61,9 @@ class _ListScreenState extends ConsumerState<ListScreen> {
     );
   }
 
-  SearchAnchor _searchBox(List<Course> options) {
+  SearchAnchor _searchBox(
+    List<Course> options,
+  ) {
     return SearchAnchor.bar(
       searchController: _searchController,
       onSubmitted: (value) {
@@ -105,7 +107,7 @@ class _ListScreenState extends ConsumerState<ListScreen> {
         ref.watch(userDataNotifierProvider);
     final List<Course> courseList = ref.watch(courseListNotifierProvider);
     final Size screenSize = MediaQuery.of(context).size;
-    final bool isPortrait = (screenSize.width / screenSize.height) < 1;
+    final bool isPortrait = ((screenSize.width - 280) / screenSize.height) < 1;
     return userDataAsyncValue.when(
         data: (data) => NestedScrollView(
               floatHeaderSlivers: true,
