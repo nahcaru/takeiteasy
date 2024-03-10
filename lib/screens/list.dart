@@ -4,8 +4,8 @@ import '../models/course.dart';
 import '../models/user_data.dart';
 import '../providers/course_list_provider.dart';
 import '../providers/user_data_provider.dart';
-import '../widgets/card.dart';
-import '../widgets/filter.dart';
+import '../widgets/course_card.dart';
+import '../widgets/filters.dart';
 
 class ListScreen extends ConsumerStatefulWidget {
   const ListScreen({super.key});
@@ -14,8 +14,6 @@ class ListScreen extends ConsumerStatefulWidget {
 }
 
 class _ListScreenState extends ConsumerState<ListScreen> {
-  final SearchController _searchController = SearchController();
-
   ButtonTheme _choiceBox(String? crclumcd) {
     Map<String, String> options = {
       '情科21(一般)': 's21310',
@@ -64,6 +62,7 @@ class _ListScreenState extends ConsumerState<ListScreen> {
   SearchAnchor _searchBox(
     List<Course> options,
   ) {
+    final SearchController _searchController = SearchController();
     return SearchAnchor.bar(
       searchController: _searchController,
       onSubmitted: (value) {
@@ -103,12 +102,11 @@ class _ListScreenState extends ConsumerState<ListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final AsyncValue<UserData> userDataAsyncValue =
-        ref.watch(userDataNotifierProvider);
+    final AsyncValue<UserData> asyncValue = ref.watch(userDataNotifierProvider);
     final List<Course> courseList = ref.watch(courseListNotifierProvider);
     final Size screenSize = MediaQuery.of(context).size;
     final bool isPortrait = ((screenSize.width - 280) / screenSize.height) < 1;
-    return userDataAsyncValue.when(
+    return asyncValue.when(
         data: (data) => NestedScrollView(
               floatHeaderSlivers: true,
               headerSliverBuilder:

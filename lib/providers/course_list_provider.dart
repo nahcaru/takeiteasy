@@ -135,4 +135,19 @@ class CourseListNotifier extends Notifier<List<Course>> {
           compulsorinessFilter;
     }).toList();
   }
+
+  List<Course> getCoursesByCodes(List<String> codes) {
+    return _courseList
+        .where((element) => codes.contains(element.code))
+        .toList();
+  }
+
+  List<Course> getCoursesByTerms(List<String>? codes, List<String> terms) {
+    if (codes == null) {
+      return [];
+    }
+    return getCoursesByCodes(codes)
+        .where((element) => terms.contains(element.term))
+        .toList();
+  }
 }
