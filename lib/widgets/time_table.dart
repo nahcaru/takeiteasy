@@ -9,21 +9,19 @@ class TimeTable extends StatelessWidget {
   });
 
   final String title;
-  final List<Course>? courses;
+  final List<Course> courses;
 
   @override
   Widget build(BuildContext context) {
     List<String> days = ['月', '火', '水', '木', '金', '土'];
-    List<String> times = ['1', '2', '3', '4', '5', '6'];
+    List<String> times = ['1', '2', '3', '4', '5'];
     List<List<List<Course>>> table = List.generate(
         times.length, (index) => List.generate(days.length, (index) => []));
-    if (courses != null) {
-      for (Course course in courses!) {
-        for (String period in course.period) {
-          int day = days.indexOf(period[0]);
-          int time = times.indexOf(period[1]);
-          table[time][day].add(course);
-        }
+    for (Course course in courses) {
+      for (String period in course.period) {
+        int day = days.indexOf(period[0]);
+        int time = times.indexOf(period[1]);
+        table[time][day].add(course);
       }
     }
 
@@ -67,6 +65,57 @@ class TimeTable extends StatelessWidget {
                 )),
             ],
           ),
+      ],
+    );
+  }
+}
+
+class CourseWrap extends StatelessWidget {
+  const CourseWrap({
+    super.key,
+    required this.title,
+    required this.courses,
+  });
+
+  final String title;
+  final List<Course> courses;
+
+  @override
+  Widget build(BuildContext context) {
+    return Table(
+      defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+      border: TableBorder.all(
+          color: Theme.of(context).dividerColor,
+          borderRadius: BorderRadius.circular(4.0)),
+      children: [
+        TableRow(children: [
+          TableCell(
+              child: Text(
+            title,
+            textAlign: TextAlign.center,
+          )),
+        ]),
+        TableRow(
+          children: [
+            TableCell(
+                child: Padding(
+              padding: const EdgeInsets.all(4.0),
+              child: SizedBox(
+                height: 300,
+                child: Wrap(
+                  children: courses
+                      .map((course) => Padding(
+                            padding: const EdgeInsets.all(4.0),
+                            child: TableCard(
+                              data: [course],
+                            ),
+                          ))
+                      .toList(),
+                ),
+              ),
+            )),
+          ],
+        ),
       ],
     );
   }

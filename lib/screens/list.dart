@@ -115,20 +115,20 @@ class _ListScreenState extends ConsumerState<ListScreen> {
                   pinned: true,
                   floating: true,
                   toolbarHeight: 0,
-                  expandedHeight: isPortrait ? 140 : 60,
+                  expandedHeight: isPortrait ? 136 : 54,
                   scrolledUnderElevation: 0,
                   flexibleSpace: FlexibleSpaceBar(
                     background: isPortrait
                         ? Column(children: [
                             _choiceBox(data.crclumcd),
                             const SizedBox(
-                              height: 10,
+                              height: 8,
                             ),
                             _searchBox(
                               courseList,
                             ),
                             const SizedBox(
-                              height: 10,
+                              height: 8,
                             ),
                             const SingleChildScrollView(
                               scrollDirection: Axis.horizontal,
@@ -141,13 +141,13 @@ class _ListScreenState extends ConsumerState<ListScreen> {
                               scrollDirection: Axis.horizontal,
                               child: Padding(
                                 padding:
-                                    const EdgeInsets.symmetric(vertical: 10),
+                                    const EdgeInsets.symmetric(vertical: 8),
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     _choiceBox(data.crclumcd),
                                     const SizedBox(
-                                      width: 20,
+                                      width: 16,
                                     ),
                                     _searchBox(
                                       courseList,
@@ -179,14 +179,12 @@ class _ListScreenState extends ConsumerState<ListScreen> {
                       ],
                     ),
                   Expanded(
-                    child: Padding(
+                    child: ListView.builder(
                       padding: const EdgeInsets.symmetric(horizontal: 8),
-                      child: ListView.builder(
-                        itemCount: courseList.length,
-                        itemBuilder: (BuildContext context, index) {
-                          return CourseCard(course: courseList[index]);
-                        },
-                      ),
+                      itemCount: courseList.length,
+                      itemBuilder: (BuildContext context, index) {
+                        return CourseCard(course: courseList[index]);
+                      },
                     ),
                   ),
                 ],

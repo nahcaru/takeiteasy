@@ -50,7 +50,7 @@ class _CourseCardState extends ConsumerState<CourseCard> {
               child: Row(
                 children: [
                   SizedBox(
-                    width: 60,
+                    width: 64,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -64,7 +64,7 @@ class _CourseCardState extends ConsumerState<CourseCard> {
                     ),
                   ),
                   const SizedBox(
-                    width: 10,
+                    width: 8,
                   ),
                   Flexible(flex: 1, child: Container()),
                   Expanded(
@@ -94,7 +94,7 @@ class _CourseCardState extends ConsumerState<CourseCard> {
                     ),
                   ),
                   SizedBox(
-                    width: 100,
+                    width: 128,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -108,7 +108,7 @@ class _CourseCardState extends ConsumerState<CourseCard> {
                     ),
                   ),
                   SizedBox(
-                    width: 60,
+                    width: 64,
                     child: Align(
                       alignment: Alignment.centerRight,
                       child: Text(
@@ -118,7 +118,7 @@ class _CourseCardState extends ConsumerState<CourseCard> {
                   ),
                   Flexible(flex: 1, child: Container()),
                   const SizedBox(
-                    width: 10,
+                    width: 8,
                   ),
                   (data.enrolledCourses?.contains(widget.course.code) ?? false)
                       ? isPortrait

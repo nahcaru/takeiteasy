@@ -99,7 +99,6 @@ class AuthGate extends StatelessWidget {
             context.go('/');
           }),
         ],
-        // ...
       ),
     );
   }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/course.dart';
 import '../models/user_data.dart';
@@ -145,7 +146,7 @@ class TableScreen extends ConsumerWidget {
         children: [
           Expanded(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.all(8),
               child: Column(
                 children: [
                   isPortrait
@@ -157,7 +158,7 @@ class TableScreen extends ConsumerWidget {
                                     data.enrolledCourses,
                                     ['前期', '前期前', '後期', '後期前'])),
                             const SizedBox(
-                              height: 20,
+                              height: 16,
                             ),
                             TimeTable(
                                 title: '後半',
@@ -176,7 +177,7 @@ class TableScreen extends ConsumerWidget {
                                       ['前期', '前期前', '後期', '後期前'])),
                             ),
                             const SizedBox(
-                              width: 20,
+                              width: 16,
                             ),
                             Expanded(
                               child: TimeTable(
@@ -188,110 +189,23 @@ class TableScreen extends ConsumerWidget {
                           ],
                         ),
                   const SizedBox(
-                    height: 20,
+                    height: 16,
                   ),
-                  // Table(
-                  //   defaultVerticalAlignment:
-                  //       TableCellVerticalAlignment.middle,
-                  //   border: TableBorder.all(
-                  //       color:
-                  //           Theme.of(context).brightness == Brightness.dark
-                  //               ? Colors.white
-                  //               : Colors.black,
-                  //       borderRadius: BorderRadius.circular(10)),
-                  //   children: [
-                  //     const TableRow(children: [
-                  //       TableCell(
-                  //           child: Text(
-                  //         '集中',
-                  //         textAlign: TextAlign.center,
-                  //       )),
-                  //     ]),
-                  //     TableRow(
-                  //       children: [
-                  //         TableCell(
-                  //           child: (intensiveClassNames.isEmpty)
-                  //               ? Container(
-                  //                   margin: const EdgeInsets.all(5),
-                  //                   height: 50,
-                  //                 )
-                  //               : SingleChildScrollView(
-                  //                   scrollDirection: Axis.horizontal,
-                  //                   child: Row(
-                  //                     children: [
-                  //                       for (int i = 0;
-                  //                           i < intensiveClassNames.length;
-                  //                           i++)
-                  //                         InkWell(
-                  //                           onTap: () {
-                  //                             Map<String, dynamic> item =
-                  //                                 data.firstWhere(
-                  //                                     (element) =>
-                  //                                         element[
-                  //                                             '講義コード'] ==
-                  //                                         intensiveClasses[
-                  //                                             i]);
-                  //                             String info = (item['クラス'] +
-                  //                                     ' ' +
-                  //                                     item['備考'])
-                  //                                 .trim();
-                  //                             showDialog(
-                  //                               context: context,
-                  //                               builder:
-                  //                                   (BuildContext context) {
-                  //                                 return AlertDialog(
-                  //                                   title: SelectionArea(
-                  //                                     child: (info == '')
-                  //                                         ? Text(
-                  //                                             item['科目名'])
-                  //                                         : Text(
-                  //                                             '($info) ${item['科目名']}'),
-                  //                                   ),
-                  //                                   content: SelectionArea(
-                  //                                     child: Row(
-                  //                                       mainAxisAlignment:
-                  //                                           MainAxisAlignment
-                  //                                               .start,
-                  //                                       children: [
-                  //                                         Text(
-                  //                                             '講義コード\n${item['講義コード']}\n\n教室\n${item['教室']}\n\n担当者\n${item['担当者']}'),
-                  //                                       ],
-                  //                                     ),
-                  //                                   ),
-                  //                                   scrollable: true,
-                  //                                 );
-                  //                               },
-                  //                             );
-                  //                           },
-                  //                           child: Container(
-                  //                             margin:
-                  //                                 const EdgeInsets.all(5),
-                  //                             height: 50,
-                  //                             decoration: BoxDecoration(
-                  //                                 color: Colors.lightBlue
-                  //                                     .withAlpha(64),
-                  //                                 borderRadius:
-                  //                                     const BorderRadius
-                  //                                         .all(
-                  //                                         Radius.circular(
-                  //                                             15))),
-                  //                             child: Center(
-                  //                               child: Text(
-                  //                                 intensiveClassNames[i],
-                  //                               ),
-                  //                             ),
-                  //                           ),
-                  //                         ),
-                  //                     ],
-                  //                   ),
-                  //                 ),
-                  //         ),
-                  //       ],
-                  //     ),
-                  //   ],
-                  // ),
-                  const SizedBox(
-                    height: 20,
+                  Row(
+                    children: [
+                      Expanded(
+                        child: CourseWrap(
+                            title: '通年・集中',
+                            courses: notifier.getCoursesByTerms(
+                                data.enrolledCourses, ['通年', '前集中', '後集中'])),
+                      ),
+                      const SizedBox(
+                        width: 16,
+                      ),
+                      Expanded(
+                        child: Container(),
+                      ),
+                    ],
                   ),
                   // Row(
                   //   mainAxisAlignment: MainAxisAlignment.center,
