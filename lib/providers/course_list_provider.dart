@@ -14,9 +14,9 @@ final courseMap =
 class CourseMapNotifier extends AsyncNotifier<Map<String, List<Course>>> {
   @override
   FutureOr<Map<String, List<Course>>> build() async {
-    Map<String, List<Course>> courses = {};
-    String jsonText = await rootBundle.loadString('assets/data.json');
-    Map<String, dynamic> jsonData = await json.decode(jsonText);
+    final Map<String, List<Course>> courses = {};
+    final String jsonText = await rootBundle.loadString('assets/data.json');
+    final Map<String, dynamic> jsonData = await json.decode(jsonText);
     for (String key in jsonData.keys) {
       courses[key] = [];
       for (Map<String, dynamic> element in jsonData[key]) {
@@ -37,9 +37,10 @@ class CourseListNotifier extends Notifier<List<Course>> {
   @override
   List<Course> build() {
     _courseList.clear();
-    Map<String, List<Course>>? courses = ref.watch(courseMap).value;
-    String? crclumcd = ref.watch(userDataNotifierProvider).value?.crclumcd;
-    Map<String, List<String>> codes = {
+    final Map<String, List<Course>>? courses = ref.watch(courseMap).value;
+    final String? crclumcd =
+        ref.watch(userDataNotifierProvider).value?.crclumcd;
+    const Map<String, List<String>> codes = {
       '情科': [
         's21310',
         's21311',
@@ -81,7 +82,7 @@ class CourseListNotifier extends Notifier<List<Course>> {
   }
 
   List<Course> sortPeriods(List<Course> instances) {
-    final daysOrder = ['月', '火', '水', '木', '金', '土', '日', ''];
+    const daysOrder = ['月', '火', '水', '木', '金', '土', '日', ''];
     instances.sort((a, b) {
       String aPeriod = a.period.firstOrNull ?? '';
       String bPeriod = b.period.firstOrNull ?? '';
@@ -142,10 +143,7 @@ class CourseListNotifier extends Notifier<List<Course>> {
         .toList();
   }
 
-  List<Course> getCoursesByTerms(List<String>? codes, List<String> terms) {
-    if (codes == null) {
-      return [];
-    }
+  List<Course> getCoursesByTerms(List<String> codes, List<String> terms) {
     return getCoursesByCodes(codes)
         .where((element) => terms.contains(element.term))
         .toList();

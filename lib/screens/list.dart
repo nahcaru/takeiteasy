@@ -15,7 +15,7 @@ class ListScreen extends ConsumerStatefulWidget {
 
 class _ListScreenState extends ConsumerState<ListScreen> {
   ButtonTheme _choiceBox(String? crclumcd) {
-    Map<String, String> options = {
+    const Map<String, String> options = {
       '情科21(一般)': 's21310',
       '情科21(国際)': 's21311',
       '情科22(一般)': 's22210',

@@ -25,6 +25,7 @@ class UserDataNotifier extends AsyncNotifier<UserData> {
     int? themeModeIndex;
     String? crclumcd;
     List<String>? enrolledCourses;
+    Map<String, double>? tookCredits;
     if (user != null) {
       try {
         await FirebaseFirestore.instance
@@ -45,6 +46,11 @@ class UserDataNotifier extends AsyncNotifier<UserData> {
               enrolledCourses!
                   .addAll(ref.get('enrolledCourses').cast<String>());
             }
+            if (data.containsKey('tookCredits')) {
+              tookCredits = {};
+              tookCredits!
+                  .addAll(ref.get('tookCredits').cast<String, double>());
+            }
           }
         });
       } catch (error) {
@@ -54,7 +60,8 @@ class UserDataNotifier extends AsyncNotifier<UserData> {
     return UserData(
         themeModeIndex: themeModeIndex,
         crclumcd: crclumcd,
-        enrolledCourses: enrolledCourses);
+        enrolledCourses: enrolledCourses,
+        tookCredits: tookCredits);
   }
 
   Future<void> _updateData(Map<String, dynamic> data) async {
@@ -87,12 +94,8 @@ class UserDataNotifier extends AsyncNotifier<UserData> {
   Future<void> addCourse(String code) async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
-      List<String>? enrolledCourses = state.value?.enrolledCourses;
-      if (enrolledCourses != null) {
-        enrolledCourses.add(code);
-      } else {
-        enrolledCourses = [code];
-      }
+      List<String> enrolledCourses = state.value?.enrolledCourses ?? [];
+      enrolledCourses.add(code);
       _updateData({'enrolledCourses': enrolledCourses});
       return state.value!.copyWith(enrolledCourses: enrolledCourses);
     });
@@ -105,6 +108,16 @@ class UserDataNotifier extends AsyncNotifier<UserData> {
       enrolledCourses!.remove(code);
       _updateData({'enrolledCourses': enrolledCourses});
       return state.value!.copyWith(enrolledCourses: enrolledCourses);
+    });
+  }
+
+  Future<void> setCredits(String key, double value) async {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() async {
+      Map<String, double> tookCredits = state.value?.tookCredits ?? {};
+      tookCredits[key] = value;
+      _updateData({'tookCredits': tookCredits});
+      return state.value!.copyWith(tookCredits: tookCredits);
     });
   }
 }

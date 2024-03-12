@@ -239,7 +239,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                       child: Row(
                         children: [
                           const SizedBox(
-                            width: (80 - 31.689971923828125) / 2,
+                            width: (80 - 31.689971923828124) / 2,
                           ),
                           Expanded(
                             child: Align(
@@ -256,7 +256,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                               ),
                             ),
                           ),
-                          const SizedBox(width: (80 - 31.689971923828125) / 2),
+                          const SizedBox(width: (80 - 31.689971923828124) / 2),
                         ],
                       ),
                     ),

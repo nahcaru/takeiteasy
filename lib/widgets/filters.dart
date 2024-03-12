@@ -68,14 +68,13 @@ class Filters extends ConsumerWidget {
       '通年': true
     };
     final Map<String, bool> categories = {
-      '教養': true,
-      '体育': true,
-      '外国語': true,
-      'PBL': true,
+      '教養科目': true,
+      '体育科目': true,
+      '外国語科目': true,
+      'PBL科目': true,
       '情報工学基盤': true,
       '専門': true,
-      '教職': true,
-      'その他': true
+      '教職科目': true,
     };
     final Map<String, bool> compulsorinesses = {
       '必修': true,
@@ -90,7 +89,6 @@ class Filters extends ConsumerWidget {
     };
     final CourseListNotifier notifier =
         ref.read(courseListNotifierProvider.notifier);
-
     return isPortrait
         ? Row(
             mainAxisAlignment: MainAxisAlignment.center,
