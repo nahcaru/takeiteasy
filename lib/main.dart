@@ -119,30 +119,31 @@ class _HomePageState extends ConsumerState<HomePage> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _showProgressDialog());
+    //WidgetsBinding.instance.addPostFrameCallback((_) => _showProgressDialog());
   }
 
-  void _showProgressDialog() {
-    showGeneralDialog(
-        context: context,
-        barrierDismissible: false,
-        transitionDuration: const Duration(milliseconds: 300),
-        barrierColor: Colors.black.withOpacity(0.5),
-        pageBuilder: (BuildContext context, Animation animation,
-            Animation secondaryAnimation) {
-          return const Center(
-            child: CircularProgressIndicator(),
-          );
-        });
-    ref.watch(userDataNotifierProvider).whenData((_) => context.pop());
-  }
+  // void _showProgressDialog() {
+  //   showGeneralDialog(
+  //       context: context,
+  //       barrierDismissible: false,
+  //       transitionDuration: const Duration(milliseconds: 300),
+  //       barrierColor: Colors.black.withOpacity(0.5),
+  //       pageBuilder: (BuildContext context, Animation animation,
+  //           Animation secondaryAnimation) {
+  //         return const Center(
+  //           child: CircularProgressIndicator(),
+  //         );
+  //       });
+  //   ref.watch(userDataNotifierProvider).whenData((_) => context.pop());
+  // }
 
   void login() {
     context.go('/login');
   }
 
   Future<void> logout() async {
-    await ref.watch(authProvider).signOut().then((_) => _showProgressDialog());
+    //await ref.watch(authProvider).signOut().then((_) => _showProgressDialog());
+    await ref.watch(authProvider).signOut();
   }
 
   void setThemeMode(int themeModeIndex) {

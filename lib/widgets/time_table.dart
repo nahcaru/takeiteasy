@@ -269,7 +269,8 @@ class CreditsTable extends ConsumerWidget {
                         isDense: true,
                         hintText: "0",
                       ),
-                      keyboardType: TextInputType.number,
+                      keyboardType:
+                          const TextInputType.numberWithOptions(decimal: true),
                       inputFormatters: [
                         FilteringTextInputFormatter.allow(
                             RegExp(r'^\d+(\.\d*)?')),

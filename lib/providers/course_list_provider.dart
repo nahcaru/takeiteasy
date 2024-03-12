@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../models/user_data.dart';
 
 import '../models/course.dart';
 import 'user_data_provider.dart';
@@ -38,8 +39,8 @@ class CourseListNotifier extends Notifier<List<Course>> {
   List<Course> build() {
     _courseList.clear();
     final Map<String, List<Course>>? courses = ref.watch(courseMap).value;
-    final String? crclumcd =
-        ref.watch(userDataNotifierProvider).value?.crclumcd;
+    final String? crclumcd = ref.watch(userDataNotifierProvider
+        .select((asyncValue) => asyncValue.value?.crclumcd));
     const Map<String, List<String>> codes = {
       '情科': [
         's21310',

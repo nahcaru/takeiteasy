@@ -62,22 +62,22 @@ class _ListScreenState extends ConsumerState<ListScreen> {
   SearchAnchor _searchBox(
     List<Course> options,
   ) {
-    final SearchController _searchController = SearchController();
+    final SearchController searchController = SearchController();
     return SearchAnchor.bar(
-      searchController: _searchController,
+      searchController: searchController,
       onSubmitted: (value) {
         ref.read(courseListNotifierProvider.notifier).search(value);
-        if (_searchController.isOpen) {
-          _searchController.closeView(value);
+        if (searchController.isOpen) {
+          searchController.closeView(value);
         }
       },
       barHintText: '検索',
       barTrailing: [
-        if (_searchController.text.isNotEmpty)
+        if (searchController.text.isNotEmpty)
           IconButton(
               icon: const Icon(Icons.clear),
               onPressed: () => setState(() {
-                    _searchController.clear();
+                    searchController.clear();
                   }))
       ],
       constraints: const BoxConstraints(
@@ -93,7 +93,7 @@ class _ListScreenState extends ConsumerState<ListScreen> {
                   ref
                       .read(courseListNotifierProvider.notifier)
                       .search(course.name);
-                  _searchController.closeView(course.name);
+                  searchController.closeView(course.name);
                 },
               ))
           .toList(),
@@ -182,9 +182,8 @@ class _ListScreenState extends ConsumerState<ListScreen> {
                     child: ListView.builder(
                       padding: const EdgeInsets.symmetric(horizontal: 8),
                       itemCount: courseList.length,
-                      itemBuilder: (BuildContext context, index) {
-                        return CourseCard(course: courseList[index]);
-                      },
+                      itemBuilder: (BuildContext context, index) =>
+                          CourseCard(course: courseList[index]),
                     ),
                   ),
                 ],

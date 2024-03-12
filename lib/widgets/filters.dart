@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/course_list_provider.dart';
+import '../models/course.dart';
 
 class FilterButton extends StatefulWidget {
   const FilterButton({
@@ -89,6 +90,15 @@ class Filters extends ConsumerWidget {
     };
     final CourseListNotifier notifier =
         ref.read(courseListNotifierProvider.notifier);
+    // ref.listen<List<Course>>(courseListNotifierProvider,
+    //     (List<Course>? previous, List<Course> next) {
+    //   notifier.filter(
+    //     grades: grades,
+    //     terms: terms,
+    //     categories: categories,
+    //     compulsorinesses: compulsorinesses,
+    //   );
+    // });
     return isPortrait
         ? Row(
             mainAxisAlignment: MainAxisAlignment.center,
