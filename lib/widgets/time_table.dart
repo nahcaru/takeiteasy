@@ -141,7 +141,26 @@ class TableCard extends StatelessWidget {
       );
     } else if (data.length == 1) {
       return InkWell(
-        onTap: () {},
+        onTap: () {
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: Text(data.first.name),
+                content: SelectionArea(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Text(
+                          '講義コード\n${data.first.code}\n\n教室\n${data.first.room}\n\n担当者\n${data.first.lecturer}'),
+                    ],
+                  ),
+                ),
+                scrollable: true,
+              );
+            },
+          );
+        },
         child: Card(
           color: Theme.of(context).colorScheme.secondaryContainer,
           child: Container(
@@ -160,7 +179,24 @@ class TableCard extends StatelessWidget {
       );
     } else {
       return InkWell(
-        onTap: () {},
+        onTap: () {
+          showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  title: const Text('科目が重複しています'),
+                  content: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Text(
+                        data.first.name,
+                      ),
+                    ],
+                  ),
+                  scrollable: true,
+                );
+              });
+        },
         child: Card(
           color: Theme.of(context).colorScheme.errorContainer,
           child: Container(

@@ -9,50 +9,6 @@ import '../widgets/time_table.dart';
 class TableScreen extends ConsumerWidget {
   const TableScreen({super.key});
 
-  //                         onTap: () {
-  //                           Map<String, dynamic> item = data.firstWhere(
-  //                               (element) => isFormer
-  //                                   ? element['講義コード'] == formerClasses[i][j]
-  //                                   : element['講義コード'] == latterClasses[i][j]);
-  //                           String info =
-  //                               (item['クラス'] + ' ' + item['備考']).trim();
-  //                           showDialog(
-  //                             context: context,
-  //                             builder: (BuildContext context) {
-  //                               return (nameData[i][j]
-  //                                       .trimRight()
-  //                                       .contains('\n'))
-  //                                   ? AlertDialog(
-  //                                       title: const Text('科目が重複しています'),
-  //                                       content: Row(
-  //                                         mainAxisAlignment:
-  //                                             MainAxisAlignment.start,
-  //                                         children: [
-  //                                           Text(nameData[i][j]),
-  //                                         ],
-  //                                       ),
-  //                                       scrollable: true,
-  //                                     )
-  //                                   : AlertDialog(
-  //                                       title: (info == '')
-  //                                           ? Text(item['科目名'])
-  //                                           : Text('($info) ${item['科目名']}'),
-  //                                       content: SelectionArea(
-  //                                         child: Row(
-  //                                           mainAxisAlignment:
-  //                                               MainAxisAlignment.start,
-  //                                           children: [
-  //                                             Text(
-  //                                                 '講義コード\n${item['講義コード']}\n\n教室\n${item['教室']}\n\n担当者\n${item['担当者']}'),
-  //                                           ],
-  //                                         ),
-  //                                       ),
-  //                                       scrollable: true,
-  //                                     );
-  //                             },
-  //                           );
-  //                         },
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final Size screenSize = MediaQuery.of(context).size;

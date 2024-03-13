@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/user_data.dart';
-
 import '../models/course.dart';
 import 'user_data_provider.dart';
 
@@ -25,21 +24,6 @@ class CourseMapNotifier extends AsyncNotifier<Map<String, List<Course>>> {
       }
     }
     return courses;
-  }
-}
-
-final testNotifierProvider = NotifierProvider<TestNotifier, String>(() {
-  return TestNotifier();
-});
-
-class TestNotifier extends Notifier<String> {
-  @override
-  String build() {
-    final Map<String, List<Course>>? courses = ref.watch(courseMap).value;
-    final String? crclumcd = ref.watch(userDataNotifierProvider
-        .select((asyncValue) => asyncValue.value?.crclumcd));
-    print('testNotifierProvider:${crclumcd ?? 'null'}');
-    return crclumcd ?? 'null';
   }
 }
 

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:takeiteasy/models/course.dart';
-import 'package:takeiteasy/models/user_data.dart';
-import 'package:takeiteasy/providers/user_data_provider.dart';
+import '../models/course.dart';
+import '../models/user_data.dart';
+import '../providers/user_data_provider.dart';
 
 class CreditsTable extends ConsumerWidget {
   const CreditsTable({
