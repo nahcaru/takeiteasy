@@ -6,6 +6,7 @@ import '../providers/course_list_provider.dart';
 import '../providers/user_data_provider.dart';
 import '../widgets/course_card.dart';
 import '../widgets/filters.dart';
+import '../widgets/search_box.dart';
 
 class ListScreen extends ConsumerStatefulWidget {
   const ListScreen({super.key});
@@ -59,47 +60,6 @@ class _ListScreenState extends ConsumerState<ListScreen> {
     );
   }
 
-  SearchAnchor _searchBox(
-    List<Course> options,
-  ) {
-    final SearchController searchController = SearchController();
-    return SearchAnchor.bar(
-      searchController: searchController,
-      onSubmitted: (value) {
-        ref.read(courseListNotifierProvider.notifier).search(value);
-        if (searchController.isOpen) {
-          searchController.closeView(value);
-        }
-      },
-      barHintText: '検索',
-      barTrailing: [
-        if (searchController.text.isNotEmpty)
-          IconButton(
-              icon: const Icon(Icons.clear),
-              onPressed: () => setState(() {
-                    searchController.clear();
-                  }))
-      ],
-      constraints: const BoxConstraints(
-        minHeight: 40,
-        maxWidth: 300,
-      ),
-      suggestionsBuilder: (context, controller) => options
-          .where((course) =>
-              course.name.toLowerCase().contains(controller.text.toLowerCase()))
-          .map((course) => ListTile(
-                title: Text(course.name),
-                onTap: () {
-                  ref
-                      .read(courseListNotifierProvider.notifier)
-                      .search(course.name);
-                  searchController.closeView(course.name);
-                },
-              ))
-          .toList(),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final AsyncValue<UserData> asyncValue = ref.watch(userDataNotifierProvider);
@@ -124,9 +84,7 @@ class _ListScreenState extends ConsumerState<ListScreen> {
                             const SizedBox(
                               height: 8,
                             ),
-                            _searchBox(
-                              courseList,
-                            ),
+                            SearchBox(),
                             const SizedBox(
                               height: 8,
                             ),
@@ -149,9 +107,7 @@ class _ListScreenState extends ConsumerState<ListScreen> {
                                     const SizedBox(
                                       width: 16,
                                     ),
-                                    _searchBox(
-                                      courseList,
-                                    ),
+                                    SearchBox(),
                                   ],
                                 ),
                               ),

@@ -28,6 +28,21 @@ class CourseMapNotifier extends AsyncNotifier<Map<String, List<Course>>> {
   }
 }
 
+final testNotifierProvider = NotifierProvider<TestNotifier, String>(() {
+  return TestNotifier();
+});
+
+class TestNotifier extends Notifier<String> {
+  @override
+  String build() {
+    final Map<String, List<Course>>? courses = ref.watch(courseMap).value;
+    final String? crclumcd = ref.watch(userDataNotifierProvider
+        .select((asyncValue) => asyncValue.value?.crclumcd));
+    print('testNotifierProvider:${crclumcd ?? 'null'}');
+    return crclumcd ?? 'null';
+  }
+}
+
 final courseListNotifierProvider =
     NotifierProvider<CourseListNotifier, List<Course>>(() {
   return CourseListNotifier();
@@ -41,6 +56,7 @@ class CourseListNotifier extends Notifier<List<Course>> {
     final Map<String, List<Course>>? courses = ref.watch(courseMap).value;
     final String? crclumcd = ref.watch(userDataNotifierProvider
         .select((asyncValue) => asyncValue.value?.crclumcd));
+    print('courseListNotifierProvider:${crclumcd ?? 'null'}');
     const Map<String, List<String>> codes = {
       '情科': [
         's21310',
@@ -111,11 +127,15 @@ class CourseListNotifier extends Notifier<List<Course>> {
     return instances;
   }
 
-  void search(String text) {
-    state = _courseList
+  List<Course> suggestion(String text) {
+    return _courseList
         .where(
             (course) => course.name.toLowerCase().contains(text.toLowerCase()))
         .toList();
+  }
+
+  void search(String text) {
+    state = suggestion(text);
   }
 
   void filter({

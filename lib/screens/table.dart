@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/user_data.dart';
 import '../providers/course_list_provider.dart';
 import '../providers/user_data_provider.dart';
+import '../widgets/credits_table.dart';
 import '../widgets/time_table.dart';
 
 class TableScreen extends ConsumerWidget {
