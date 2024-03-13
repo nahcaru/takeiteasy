@@ -96,7 +96,7 @@ class AuthGate extends StatelessWidget {
         ],
         actions: [
           AuthStateChangeAction<SignedIn>((context, _) {
-            context.go('/');
+            context.pop();
           }),
         ],
       ),
@@ -116,34 +116,13 @@ class _HomePageState extends ConsumerState<HomePage> {
   int currentPageIndex = 0;
   bool extended = false;
 
-  @override
-  void initState() {
-    super.initState();
-    //WidgetsBinding.instance.addPostFrameCallback((_) => _showProgressDialog());
-  }
-
-  // void _showProgressDialog() {
-  //   showGeneralDialog(
-  //       context: context,
-  //       barrierDismissible: false,
-  //       transitionDuration: const Duration(milliseconds: 300),
-  //       barrierColor: Colors.black.withOpacity(0.5),
-  //       pageBuilder: (BuildContext context, Animation animation,
-  //           Animation secondaryAnimation) {
-  //         return const Center(
-  //           child: CircularProgressIndicator(),
-  //         );
-  //       });
-  //   ref.watch(userDataNotifierProvider).whenData((_) => context.pop());
-  // }
-
   void login() {
-    context.go('/login');
+    context.push('/login');
   }
 
   Future<void> logout() async {
-    //await ref.watch(authProvider).signOut().then((_) => _showProgressDialog());
     await ref.watch(authProvider).signOut();
+    context.pushReplacement('/');
   }
 
   void setThemeMode(int themeModeIndex) {
