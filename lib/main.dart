@@ -14,8 +14,8 @@ import 'env/env.dart';
 import 'firebase_options.dart';
 import 'models/user_data.dart';
 import 'providers/user_data_provider.dart';
-import 'screens/list.dart';
-import 'screens/table.dart';
+import 'screens/list_screen.dart';
+import 'screens/table_screen.dart';
 
 final GoRouter _router = GoRouter(
   initialLocation: '/',

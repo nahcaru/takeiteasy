@@ -20,7 +20,6 @@ class _SearchBoxState extends ConsumerState<SearchBox> {
           SearchBox.searchController.closeView(value);
         }
         FocusScope.of(context).unfocus();
-
         notifier.search(value);
       },
       barHintText: '検索',
