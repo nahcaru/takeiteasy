@@ -6,7 +6,7 @@ import '../models/user_data.dart';
 import '../models/course.dart';
 import 'user_data_provider.dart';
 
-final courseMap =
+final courseMapNotifierProvider =
     AsyncNotifierProvider<CourseMapNotifier, Map<String, List<Course>>>(() {
   return CourseMapNotifier();
 });
@@ -33,11 +33,28 @@ final courseListNotifierProvider =
 });
 
 class CourseListNotifier extends Notifier<List<Course>> {
-  final List<Course> _courseList = [];
+  final List<Course> _courses = [];
+  String _searchText = '';
+  final Map<String, Map<String, bool>> _filters = {
+    '学年': {'1年': false, '2年': false, '3年': false, '4年': false},
+    '学期': {'後期前': false, '後期後': false, '後期': false, '後集中': false, '通年': false},
+    '分類': {
+      '教養科目': false,
+      '体育科目': false,
+      '外国語科目': false,
+      'PBL科目': false,
+      '情報工学基盤': false,
+      '専門': false,
+      '教職科目': false,
+    },
+    '必選': {'必修': false, '選択必修': false, '選択': false}
+  };
+
   @override
   List<Course> build() {
-    _courseList.clear();
-    final Map<String, List<Course>>? courses = ref.watch(courseMap).value;
+    _courses.clear();
+    final Map<String, List<Course>>? courseMap =
+        ref.watch(courseMapNotifierProvider).value;
     final String? crclumcd = ref.watch(userDataNotifierProvider
         .select((asyncValue) => asyncValue.value?.crclumcd));
     print('courseListNotifierProvider:${crclumcd ?? 'null'}');
@@ -63,28 +80,29 @@ class CourseListNotifier extends Notifier<List<Course>> {
         's24321'
       ],
     };
-    if (crclumcd != null && courses != null) {
+    if (crclumcd != null && courseMap != null) {
       for (String key in codes.keys) {
         if (codes[key]!.contains(crclumcd)) {
-          for (Course course in courses[key]!) {
+          for (Course course in courseMap[key]!) {
             if (course.target.any((target) => crclumcd.startsWith(target))) {
-              _courseList.add(course);
+              _courses.add(course);
             }
           }
-          for (Course course in courses['共通']!) {
+          for (Course course in courseMap['共通']!) {
             if (course.target.any((target) => crclumcd.startsWith(target))) {
-              _courseList.add(course);
+              _courses.add(course);
             }
           }
         }
       }
     }
-    return sortPeriods(_courseList);
+    sortPeriods();
+    return filter();
   }
 
-  List<Course> sortPeriods(List<Course> instances) {
+  void sortPeriods() {
     const daysOrder = ['月', '火', '水', '木', '金', '土', '日', ''];
-    instances.sort((a, b) {
+    _courses.sort((a, b) {
       String aPeriod = a.period.firstOrNull ?? '';
       String bPeriod = b.period.firstOrNull ?? '';
       if (aPeriod == '' && bPeriod == '') {
@@ -107,34 +125,39 @@ class CourseListNotifier extends Notifier<List<Course>> {
         }
       }
     });
-
-    return instances;
   }
 
   List<Course> suggestion(String text) {
-    return _courseList
+    return _courses
         .where(
             (course) => course.name.toLowerCase().contains(text.toLowerCase()))
         .toList();
   }
 
   void search(String text) {
-    state = suggestion(text);
+    _searchText = text;
+    state = filter();
   }
 
-  void filter({
-    required Map<String, bool> grades,
-    required Map<String, bool> terms,
-    required Map<String, bool> categories,
-    required Map<String, bool> compulsorinesses,
-  }) {
-    state = _courseList.where((course) {
-      bool gradeFilter = grades[course.grade.toString()] ?? false;
-      bool termFilter = terms[course.term] ?? false;
+  void setFilters(Map<String, Map<String, bool>> filters) {
+    _filters.clear();
+    _filters.addAll(filters);
+    state = filter();
+  }
+
+  List<Course> filter() {
+    return suggestion(_searchText).where((course) {
+      bool gradeFilter = _filters['学年']!['${course.grade}年']! ||
+          _filters['学年']!.values.every((element) => element == false);
+      bool termFilter = _filters['学期']![course.term]! ||
+          _filters['学期']!.values.every((element) => element == false);
       String? crclumcd = ref.watch(userDataNotifierProvider).value?.crclumcd;
-      bool categoryFilter = categories[course.category[crclumcd]] ?? false;
+      bool categoryFilter =
+          (_filters['分類']![course.category[crclumcd]] ?? false) ||
+              _filters['分類']!.values.every((element) => element == false);
       bool compulsorinessFilter =
-          compulsorinesses[course.compulsoriness[crclumcd]] ?? false;
+          (_filters['必選']![course.compulsoriness[crclumcd]] ?? false) ||
+              _filters['必選']!.values.every((element) => element == false);
       return gradeFilter &&
           termFilter &&
           categoryFilter &&
@@ -143,9 +166,7 @@ class CourseListNotifier extends Notifier<List<Course>> {
   }
 
   List<Course> getCoursesByCodes(List<String> codes) {
-    return _courseList
-        .where((element) => codes.contains(element.code))
-        .toList();
+    return _courses.where((element) => codes.contains(element.code)).toList();
   }
 
   List<Course> getCoursesByTerms(List<String> codes, List<String> terms) {

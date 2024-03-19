@@ -55,50 +55,28 @@ class Filters extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final Map<String, bool> grades = {
-      '1': true,
-      '2': true,
-      '3': true,
-      '4': true
-    };
-    final Map<String, bool> terms = {
-      '後期前': true,
-      '後期後': true,
-      '後期': true,
-      '後集中': true,
-      '通年': true
-    };
-    final Map<String, bool> categories = {
-      '教養科目': true,
-      '体育科目': true,
-      '外国語科目': true,
-      'PBL科目': true,
-      '情報工学基盤': true,
-      '専門': true,
-      '教職科目': true,
-    };
-    final Map<String, bool> compulsorinesses = {
-      '必修': true,
-      '選択必修': true,
-      '選択': true
-    };
     final Map<String, Map<String, bool>> items = {
-      '学年': grades,
-      '学期': terms,
-      '分類': categories,
-      '必選': compulsorinesses
+      '学年': {'1年': false, '2年': false, '3年': false, '4年': false},
+      '学期': {
+        '後期前': false,
+        '後期後': false,
+        '後期': false,
+        '後集中': false,
+        '通年': false
+      },
+      '分類': {
+        '教養科目': false,
+        '体育科目': false,
+        '外国語科目': false,
+        'PBL科目': false,
+        '情報工学基盤': false,
+        '専門': false,
+        '教職科目': false,
+      },
+      '必選': {'必修': false, '選択必修': false, '選択': false}
     };
     final CourseListNotifier notifier =
         ref.read(courseListNotifierProvider.notifier);
-    // ref.listen<List<Course>>(courseListNotifierProvider,
-    //     (List<Course>? previous, List<Course> next) {
-    //   notifier.filter(
-    //     grades: grades,
-    //     terms: terms,
-    //     categories: categories,
-    //     compulsorinesses: compulsorinesses,
-    //   );
-    // });
     return isPortrait
         ? Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -111,12 +89,7 @@ class Filters extends ConsumerWidget {
                           title: entry.key,
                           items: entry.value,
                           onChanged: (bool? value) {
-                            notifier.filter(
-                              grades: grades,
-                              terms: terms,
-                              categories: categories,
-                              compulsorinesses: compulsorinesses,
-                            );
+                            notifier.setFilters(items);
                           }),
                     ],
                   ),
@@ -129,12 +102,7 @@ class Filters extends ConsumerWidget {
                       title: entry.key,
                       items: entry.value,
                       onChanged: (bool? value) {
-                        notifier.filter(
-                          grades: grades,
-                          terms: terms,
-                          categories: categories,
-                          compulsorinesses: compulsorinesses,
-                        );
+                        notifier.setFilters(items);
                       },
                     ))
                 .toList(),

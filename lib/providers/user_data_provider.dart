@@ -28,7 +28,8 @@ class UserDataNotifier extends AsyncNotifier<UserData> {
     Map<String, double>? tookCredits;
     if (user != null) {
       try {
-        await FirebaseFirestore.instance
+        await ref
+            .watch(fireStoreProvider)
             .collection('users')
             .doc(user.uid)
             .get()
@@ -65,7 +66,7 @@ class UserDataNotifier extends AsyncNotifier<UserData> {
   }
 
   Future<void> _updateData(Map<String, dynamic> data) async {
-    User? user = ref.read(authProvider).currentUser;
+    User? user = ref.watch(authProvider).currentUser;
     if (user != null) {
       await ref
           .watch(fireStoreProvider)

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:takeiteasy/providers/user_data_provider.dart';
+import '../providers/user_data_provider.dart';
 
 class ChoiceBox extends ConsumerWidget {
   const ChoiceBox({

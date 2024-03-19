@@ -61,11 +61,8 @@ class CourseTable extends StatelessWidget {
               )),
               for (int j = 0; j < days.length; j++)
                 TableCell(
-                    child: Padding(
-                  padding: const EdgeInsets.all(4.0),
-                  child: TableCard(
-                    data: table[i][j],
-                  ),
+                    child: TableCard(
+                  data: table[i][j],
                 )),
             ],
           ),
@@ -189,7 +186,7 @@ class TableCard extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       Text(
-                        data.first.name,
+                        data.map((course) => course.name).join('\n'),
                       ),
                     ],
                   ),

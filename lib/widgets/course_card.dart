@@ -68,7 +68,7 @@ class _CourseCardState extends ConsumerState<CourseCard> {
                   ),
                   Flexible(flex: 1, child: Container()),
                   Expanded(
-                    flex: 9,
+                    flex: 8,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -82,7 +82,6 @@ class _CourseCardState extends ConsumerState<CourseCard> {
                             style: TextStyle(
                               color: Theme.of(context).colorScheme.primary,
                               fontSize: 18,
-                              fontWeight: FontWeight.bold,
                             )),
                         Text(
                           widget.course.note,
@@ -94,7 +93,7 @@ class _CourseCardState extends ConsumerState<CourseCard> {
                     ),
                   ),
                   SizedBox(
-                    width: 128,
+                    width: 100,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
