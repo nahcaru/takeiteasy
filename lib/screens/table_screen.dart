@@ -15,7 +15,7 @@ class TableScreen extends ConsumerWidget {
     final bool isPortrait = ((screenSize.width - 80) / screenSize.height) < 1;
     final AsyncValue<UserData> asyncValue = ref.watch(userDataNotifierProvider);
     final CourseListNotifier notifier =
-        ref.watch(courseListNotifierProvider.notifier);
+        ref.read(courseListNotifierProvider.notifier);
     return asyncValue.when(
       data: (data) => Row(
         children: [

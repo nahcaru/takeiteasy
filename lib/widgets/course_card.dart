@@ -29,7 +29,7 @@ class _CourseCardState extends ConsumerState<CourseCard> {
   Widget build(BuildContext context) {
     final AsyncValue<UserData> asyncValue = ref.watch(userDataNotifierProvider);
     final UserDataNotifier notifier =
-        ref.watch(userDataNotifierProvider.notifier);
+        ref.read(userDataNotifierProvider.notifier);
     final Size screenSize = MediaQuery.of(context).size;
     final bool isPortrait = ((screenSize.width - 280) / screenSize.height) < 1;
     return asyncValue.when(
@@ -74,20 +74,18 @@ class _CourseCardState extends ConsumerState<CourseCard> {
                       children: [
                         Text(
                           widget.course.class_,
-                          style: const TextStyle(
-                            fontSize: 12,
-                          ),
+                          style: Theme.of(context).textTheme.labelMedium,
                         ),
                         Text(widget.course.name,
-                            style: TextStyle(
-                              color: Theme.of(context).colorScheme.primary,
-                              fontSize: 18,
-                            )),
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleLarge!
+                                .copyWith(
+                                  color: Theme.of(context).colorScheme.primary,
+                                )),
                         Text(
                           widget.course.note,
-                          style: const TextStyle(
-                            fontSize: 12,
-                          ),
+                          style: Theme.of(context).textTheme.labelMedium,
                         ),
                       ],
                     ),
@@ -112,6 +110,9 @@ class _CourseCardState extends ConsumerState<CourseCard> {
                       alignment: Alignment.centerRight,
                       child: Text(
                         '${widget.course.credits[data.crclumcd] ?? '-'}単位',
+                        style: const TextStyle(fontFeatures: [
+                          FontFeature.tabularFigures(),
+                        ]),
                       ),
                     ),
                   ),

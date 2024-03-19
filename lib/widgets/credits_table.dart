@@ -17,7 +17,7 @@ class CreditsTable extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final AsyncValue<UserData> asyncValue = ref.watch(userDataNotifierProvider);
     final UserDataNotifier notifier =
-        ref.watch(userDataNotifierProvider.notifier);
+        ref.read(userDataNotifierProvider.notifier);
     final Map<String, Map<String, double>> categories = {
       '教養科目': {},
       '体育科目': {},

@@ -151,7 +151,8 @@ class CourseListNotifier extends Notifier<List<Course>> {
           _filters['学年']!.values.every((element) => element == false);
       bool termFilter = _filters['学期']![course.term]! ||
           _filters['学期']!.values.every((element) => element == false);
-      String? crclumcd = ref.watch(userDataNotifierProvider).value?.crclumcd;
+      String? crclumcd = ref.watch(userDataNotifierProvider
+          .select((asyncValue) => asyncValue.value?.crclumcd));
       bool categoryFilter =
           (_filters['分類']![course.category[crclumcd]] ?? false) ||
               _filters['分類']!.values.every((element) => element == false);
