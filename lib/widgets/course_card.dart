@@ -1,7 +1,7 @@
-import 'dart:async' show Future;
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:url_launcher/link.dart';
 import '../models/course.dart';
 import '../models/user_data.dart';
 import '../providers/user_data_provider.dart';
@@ -15,16 +15,6 @@ class CourseCard extends ConsumerStatefulWidget {
 }
 
 class _CourseCardState extends ConsumerState<CourseCard> {
-  Future<void> _launchUrl(Uri url) async {
-    if (!await launchUrl(
-      url,
-      mode: LaunchMode.inAppBrowserView,
-      webOnlyWindowName: '_blank',
-    )) {
-      //throw Exception('Could not launch $url');
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final AsyncValue<UserData> asyncValue = ref.watch(userDataNotifierProvider);
@@ -35,121 +25,223 @@ class _CourseCardState extends ConsumerState<CourseCard> {
     return asyncValue.when(
       data: (data) => Card(
         child: InkWell(
-          onTap: () => _launchUrl(Uri(
-              scheme: 'https',
-              host: 'websrv.tcu.ac.jp',
-              path: '/tcu_web_v3/slbssbdr.do',
-              queryParameters: {
-                'value(risyunen)': '2023',
-                'value(semekikn)': '1',
-                'value(kougicd)': widget.course.code,
-                'value(crclumcd)': data.crclumcd,
-              })),
+          onTap: () {
+            showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  title: Text(widget.course.name),
+                  content: SelectionArea(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Text(
+                            '講義コード\n${widget.course.code}\n\n教室\n${widget.course.room}\n\n担当者\n${widget.course.lecturer}'),
+                      ],
+                    ),
+                  ),
+                  scrollable: true,
+                );
+              },
+            );
+          },
           child: Padding(
               padding: const EdgeInsets.all(8),
               child: Row(
-                children: [
-                  SizedBox(
-                    width: 64,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          widget.course.term,
+                children: isPortrait
+                    ? [
+                        Expanded(
+                          flex: 8,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                '${widget.course.term} ${widget.course.period.join(',')} ${widget.course.class_}',
+                                style: Theme.of(context).textTheme.labelMedium,
+                              ),
+                              Link(
+                                uri: Uri(
+                                    scheme: 'https',
+                                    host: 'websrv.tcu.ac.jp',
+                                    path: '/tcu_web_v3/slbssbdr.do',
+                                    queryParameters: {
+                                      'value(risyunen)': '2023',
+                                      'value(semekikn)': '1',
+                                      'value(kougicd)': widget.course.code,
+                                      'value(crclumcd)': data.crclumcd,
+                                    }),
+                                builder: (BuildContext context,
+                                        FollowLink? followLink) =>
+                                    Text.rich(
+                                  TextSpan(
+                                    text: widget.course.name,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium!
+                                        .copyWith(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .primary,
+                                        ),
+                                    recognizer: TapGestureRecognizer()
+                                      ..onTap = () => followLink,
+                                  ),
+                                ),
+                              ),
+                              Row(
+                                children: [
+                                  Text(
+                                    widget.course.note,
+                                    style:
+                                        Theme.of(context).textTheme.labelMedium,
+                                  ),
+                                  Expanded(
+                                    child: Container(),
+                                  ),
+                                  Text(
+                                    '${[
+                                      widget.course.category[data.crclumcd],
+                                      widget
+                                          .course.compulsoriness[data.crclumcd]
+                                    ].join('・')} ${widget.course.credits[data.crclumcd] ?? '-'}単位',
+                                    style:
+                                        Theme.of(context).textTheme.labelMedium,
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
-                        Text(
-                          widget.course.period.join(','),
-                        )
-                      ],
-                    ),
-                  ),
-                  const SizedBox(
-                    width: 8,
-                  ),
-                  Flexible(flex: 1, child: Container()),
-                  Expanded(
-                    flex: 8,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          widget.course.class_,
-                          style: Theme.of(context).textTheme.labelMedium,
+                        const SizedBox(
+                          width: 8,
                         ),
-                        Text(widget.course.name,
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleLarge!
-                                .copyWith(
-                                  color: Theme.of(context).colorScheme.primary,
-                                )),
-                        Text(
-                          widget.course.note,
-                          style: Theme.of(context).textTheme.labelMedium,
+                        (data.enrolledCourses?.contains(widget.course.code) ??
+                                false)
+                            ? IconButton.outlined(
+                                onPressed: () => setState(() {
+                                  notifier.removeCourse(widget.course.code);
+                                }),
+                                icon: const Icon(Icons.playlist_add_check),
+                              )
+                            : IconButton.filled(
+                                onPressed: () => setState(() {
+                                  notifier.addCourse(widget.course.code);
+                                }),
+                                icon: const Icon(Icons.playlist_add_outlined),
+                              ),
+                      ]
+                    : [
+                        SizedBox(
+                          width: 64,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                widget.course.term,
+                              ),
+                              Text(
+                                widget.course.period.join(','),
+                              )
+                            ],
+                          ),
                         ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(
-                    width: 100,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          widget.course.category[data.crclumcd] ?? '',
+                        const SizedBox(
+                          width: 8,
                         ),
-                        Text(
-                          widget.course.compulsoriness[data.crclumcd] ?? '',
+                        Flexible(flex: 1, child: Container()),
+                        Expanded(
+                          flex: 8,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                widget.course.class_,
+                                style: Theme.of(context).textTheme.labelMedium,
+                              ),
+                              Link(
+                                uri: Uri(
+                                    scheme: 'https',
+                                    host: 'websrv.tcu.ac.jp',
+                                    path: '/tcu_web_v3/slbssbdr.do',
+                                    queryParameters: {
+                                      'value(risyunen)': '2023',
+                                      'value(semekikn)': '1',
+                                      'value(kougicd)': widget.course.code,
+                                      'value(crclumcd)': data.crclumcd,
+                                    }),
+                                builder: (BuildContext context,
+                                        FollowLink? followLink) =>
+                                    Text.rich(
+                                  TextSpan(
+                                    text: widget.course.name,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleLarge!
+                                        .copyWith(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .primary,
+                                        ),
+                                    recognizer: TapGestureRecognizer()
+                                      ..onTap = () => followLink,
+                                  ),
+                                ),
+                              ),
+                              Text(
+                                widget.course.note,
+                                style: Theme.of(context).textTheme.labelMedium,
+                              ),
+                            ],
+                          ),
                         ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(
-                    width: 64,
-                    child: Align(
-                      alignment: Alignment.centerRight,
-                      child: Text(
-                        '${widget.course.credits[data.crclumcd] ?? '-'}単位',
-                        style: const TextStyle(fontFeatures: [
-                          FontFeature.tabularFigures(),
-                        ]),
-                      ),
-                    ),
-                  ),
-                  Flexible(flex: 1, child: Container()),
-                  const SizedBox(
-                    width: 8,
-                  ),
-                  (data.enrolledCourses?.contains(widget.course.code) ?? false)
-                      ? isPortrait
-                          ? IconButton.outlined(
-                              onPressed: () => setState(() {
-                                notifier.removeCourse(widget.course.code);
-                              }),
-                              icon: const Icon(Icons.playlist_add_check),
-                            )
-                          : OutlinedButton.icon(
-                              onPressed: () => setState(() {
-                                notifier.removeCourse(widget.course.code);
-                              }),
-                              icon: const Icon(Icons.playlist_add_check),
-                              label: const Text('取消'),
-                            )
-                      : isPortrait
-                          ? IconButton.filled(
-                              onPressed: () => setState(() {
-                                notifier.addCourse(widget.course.code);
-                              }),
-                              icon: const Icon(Icons.playlist_add_outlined),
-                            )
-                          : FilledButton.icon(
-                              onPressed: () => setState(() {
-                                notifier.addCourse(widget.course.code);
-                              }),
-                              icon: const Icon(Icons.playlist_add_outlined),
-                              label: const Text('登録'),
+                        SizedBox(
+                          width: 100,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                widget.course.category[data.crclumcd] ?? '',
+                              ),
+                              Text(
+                                widget.course.compulsoriness[data.crclumcd] ??
+                                    '',
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(
+                          width: 64,
+                          child: Align(
+                            alignment: Alignment.centerRight,
+                            child: Text(
+                              '${widget.course.credits[data.crclumcd] ?? '-'}単位',
+                              style: const TextStyle(fontFeatures: [
+                                FontFeature.tabularFigures(),
+                              ]),
                             ),
-                ],
+                          ),
+                        ),
+                        Flexible(flex: 1, child: Container()),
+                        const SizedBox(
+                          width: 8,
+                        ),
+                        (data.enrolledCourses?.contains(widget.course.code) ??
+                                false)
+                            ? OutlinedButton.icon(
+                                onPressed: () => setState(() {
+                                  notifier.removeCourse(widget.course.code);
+                                }),
+                                icon: const Icon(Icons.playlist_add_check),
+                                label: const Text('取消'),
+                              )
+                            : FilledButton.icon(
+                                onPressed: () => setState(() {
+                                  notifier.addCourse(widget.course.code);
+                                }),
+                                icon: const Icon(Icons.playlist_add_outlined),
+                                label: const Text('登録'),
+                              ),
+                      ],
               )),
         ),
       ),

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/course_list_provider.dart';
-import '../models/course.dart';
 
 class FilterButton extends StatefulWidget {
   const FilterButton({
