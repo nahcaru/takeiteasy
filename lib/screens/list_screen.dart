@@ -39,9 +39,10 @@ class ListScreen extends ConsumerWidget {
                             const SizedBox(
                               height: 8,
                             ),
-                            const SingleChildScrollView(
+                            SingleChildScrollView(
                               scrollDirection: Axis.horizontal,
-                              child: Filters(isPortrait: true),
+                              child: Filters(
+                                  crclumcd: data.crclumcd, isPortrait: true),
                             ),
                           ])
                         : Align(
@@ -70,7 +71,7 @@ class ListScreen extends ConsumerWidget {
               body: Row(
                 children: [
                   if (!isPortrait)
-                    const Row(
+                    Row(
                       children: [
                         SizedBox(
                             width: 200,
@@ -78,20 +79,27 @@ class ListScreen extends ConsumerWidget {
                               alignment: Alignment.topCenter,
                               child: SingleChildScrollView(
                                   primary: false,
-                                  child: Filters(isPortrait: false)),
+                                  child: Filters(
+                                      crclumcd: data.crclumcd,
+                                      isPortrait: false)),
                             )),
-                        VerticalDivider(
+                        const VerticalDivider(
                           width: 0,
                         ),
                       ],
                     ),
                   Expanded(
-                    child: ListView.builder(
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
-                      itemCount: courseList.length,
-                      itemBuilder: (BuildContext context, index) =>
-                          CourseCard(course: courseList[index]),
-                    ),
+                    child: courseList.isEmpty
+                        ? Center(
+                            child: data.crclumcd == null
+                                ? const Text('カリキュラムを選択してください')
+                                : const Text('該当する授業がありません'))
+                        : ListView.builder(
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                            itemCount: courseList.length,
+                            itemBuilder: (BuildContext context, index) =>
+                                CourseCard(course: courseList[index]),
+                          ),
                   ),
                 ],
               ),

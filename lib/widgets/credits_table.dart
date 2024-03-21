@@ -33,7 +33,7 @@ class CreditsTable extends ConsumerWidget {
             in categories.entries) {
           double? credits = userData.tookCredits?[category.key];
           if (credits != null) {
-            category.value['取得済み'] = credits;
+            category.value['修得済'] = credits;
           }
 
           category.value['新規'] = data
@@ -58,7 +58,7 @@ class CreditsTable extends ConsumerWidget {
               )),
               TableCell(
                   child: Text(
-                '取得済み',
+                '修得済',
                 textAlign: TextAlign.center,
               )),
               TableCell(
@@ -83,7 +83,7 @@ class CreditsTable extends ConsumerWidget {
                   TableCell(
                     child: TextFormField(
                       initialValue:
-                          categories.values.elementAt(i)['取得済み']?.toString(),
+                          categories.values.elementAt(i)['修得済']?.toString(),
                       textAlign: TextAlign.center,
                       decoration: const InputDecoration(
                         isDense: true,
@@ -111,7 +111,7 @@ class CreditsTable extends ConsumerWidget {
                   )),
                   TableCell(
                       child: Text(
-                    ((categories.values.elementAt(i)['取得済み'] ?? 0) +
+                    ((categories.values.elementAt(i)['修得済'] ?? 0) +
                             categories.values.elementAt(i)['新規']!)
                         .toString(),
                     style: Theme.of(context).textTheme.bodyLarge,
@@ -139,7 +139,7 @@ class CreditsTable extends ConsumerWidget {
                       .fold<double>(
                           0,
                           (previousValue, element) =>
-                              previousValue + (element["取得済み"] ?? 0.0))
+                              previousValue + (element["修得済"] ?? 0.0))
                       .toString(),
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.bodyLarge!.copyWith(
@@ -168,7 +168,7 @@ class CreditsTable extends ConsumerWidget {
                           0,
                           (previousValue, element) =>
                               previousValue +
-                              (element["取得済み"] ?? 0.0) +
+                              (element["修得済"] ?? 0.0) +
                               element["新規"]!)
                       .toString(),
                   textAlign: TextAlign.center,

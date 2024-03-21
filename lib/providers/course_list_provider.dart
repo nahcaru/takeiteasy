@@ -34,6 +34,7 @@ final courseListNotifierProvider =
 class CourseListNotifier extends Notifier<List<Course>> {
   final List<Course> _courses = [];
   String _searchText = '';
+  bool _enrolledOnly = false;
   final Map<String, Map<String, bool>> _filters = {
     '学年': {'1年': false, '2年': false, '3年': false, '4年': false},
     '学期': {'後期前': false, '後期後': false, '後期': false, '後集中': false, '通年': false},
@@ -48,6 +49,31 @@ class CourseListNotifier extends Notifier<List<Course>> {
     },
     '必選': {'必修': false, '選択必修': false, '選択': false}
   };
+  bool _internationalSpecified = false;
+  final List<String> _internationalSpecifiedCourses = const [
+    'Test Taking Skills(3a)',
+    'Test Taking Skills(3b)',
+    'Critical Reading(2a)',
+    'Critical Reading(2b)',
+    'Critical Reading(3a)',
+    'Critical Reading(3b)',
+    'Critical Listening(2a)',
+    'Critical Listening(2b)',
+    'Critical Listening(3a)',
+    'Critical Listening(3b)',
+    'Communication Strategies(2a)',
+    'Communication Strategies(2b)',
+    'Communication Strategies(3a)',
+    'Communication Strategies(3b)',
+    'Academic English(2a)',
+    'Academic English(2b)',
+    'Academic English(3a)',
+    'Academic English(3b)',
+    'Global Culture(2a)',
+    'Global Culture(2b)',
+    'Language Sciences(2a)',
+    'Language Sciences(2b)',
+  ];
 
   @override
   List<Course> build() {
@@ -99,7 +125,7 @@ class CourseListNotifier extends Notifier<List<Course>> {
   }
 
   void sortPeriods() {
-    const daysOrder = ['月', '火', '水', '木', '金', '土', '日', ''];
+    const daysOrder = ['月', '火', '水', '木', '金', '土', ''];
     _courses.sort((a, b) {
       String aPeriod = a.period.firstOrNull ?? '';
       String bPeriod = b.period.firstOrNull ?? '';
@@ -132,19 +158,44 @@ class CourseListNotifier extends Notifier<List<Course>> {
         .toList();
   }
 
+  void setEnrolledOnly(bool value) {
+    _enrolledOnly = value;
+  }
+
+  void setInternationalSpecified(bool value) {
+    _internationalSpecified = value;
+  }
+
   void search(String text) {
     _searchText = text;
-    state = filter();
+    applyFilter();
   }
 
   void setFilters(Map<String, Map<String, bool>> filters) {
     _filters.clear();
     _filters.addAll(filters);
+  }
+
+  void applyFilter() {
     state = filter();
   }
 
   List<Course> filter() {
-    return suggestion(_searchText).where((course) {
+    List<Course> targetCourses = suggestion(_searchText);
+    if (_enrolledOnly) {
+      List<String>? enrolledCourses = ref.watch(userDataNotifierProvider
+          .select((asyncValue) => asyncValue.value?.enrolledCourses));
+      targetCourses = targetCourses
+          .where((course) => enrolledCourses?.contains(course.code) ?? false)
+          .toList();
+    }
+    if (_internationalSpecified) {
+      targetCourses = targetCourses
+          .where(
+              (course) => _internationalSpecifiedCourses.contains(course.name))
+          .toList();
+    }
+    return targetCourses.where((course) {
       bool gradeFilter = _filters['学年']!['${course.grade}年']! ||
           _filters['学年']!.values.every((element) => element == false);
       bool termFilter = _filters['学期']![course.term]! ||
@@ -154,9 +205,16 @@ class CourseListNotifier extends Notifier<List<Course>> {
       bool categoryFilter =
           (_filters['分類']![course.category[crclumcd]] ?? false) ||
               _filters['分類']!.values.every((element) => element == false);
-      bool compulsorinessFilter =
-          (_filters['必選']![course.compulsoriness[crclumcd]] ?? false) ||
-              _filters['必選']!.values.every((element) => element == false);
+      bool compulsorinessFilter;
+      if (course.compulsoriness[crclumcd] == '必修') {
+        compulsorinessFilter = _filters['必選']!['必修']!;
+      } else if (course.compulsoriness[crclumcd]!.contains('選択必修')) {
+        compulsorinessFilter = _filters['必選']!['選択必修']!;
+      } else {
+        compulsorinessFilter = _filters['必選']!['選択']!;
+      }
+      compulsorinessFilter = compulsorinessFilter ||
+          _filters['必選']!.values.every((element) => element == false);
       return gradeFilter &&
           termFilter &&
           categoryFilter &&

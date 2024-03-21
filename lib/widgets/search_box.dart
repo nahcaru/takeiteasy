@@ -17,7 +17,9 @@ class _SearchBoxState extends ConsumerState<SearchBox> {
       searchController: SearchBox.searchController,
       onSubmitted: (value) {
         if (SearchBox.searchController.isOpen) {
-          SearchBox.searchController.closeView(value);
+          setState(() {
+            SearchBox.searchController.closeView(value);
+          });
         }
         FocusScope.of(context).unfocus();
         notifier.search(value);
@@ -41,7 +43,9 @@ class _SearchBoxState extends ConsumerState<SearchBox> {
           .map((course) => ListTile(
                 title: Text(course.name),
                 onTap: () {
-                  controller.closeView(course.name);
+                  setState(() {
+                    controller.closeView(course.name);
+                  });
                   FocusScope.of(context).unfocus();
                   notifier.search(course.name);
                 },

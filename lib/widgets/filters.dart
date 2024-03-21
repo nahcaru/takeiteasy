@@ -45,66 +45,137 @@ class _FilterButtonState extends State<FilterButton> {
   }
 }
 
-class Filters extends ConsumerWidget {
+class Filters extends ConsumerStatefulWidget {
   const Filters({
     super.key,
+    this.crclumcd,
     required this.isPortrait,
   });
   final bool isPortrait;
+  final String? crclumcd;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final Map<String, Map<String, bool>> items = {
-      '学年': {'1年': false, '2年': false, '3年': false, '4年': false},
-      '学期': {
-        '後期前': false,
-        '後期後': false,
-        '後期': false,
-        '後集中': false,
-        '通年': false
-      },
-      '分類': {
-        '教養科目': false,
-        '体育科目': false,
-        '外国語科目': false,
-        'PBL科目': false,
-        '情報工学基盤': false,
-        '専門': false,
-        '教職科目': false,
-      },
-      '必選': {'必修': false, '選択必修': false, '選択': false}
-    };
+  ConsumerState<Filters> createState() => _FiltersState();
+}
+
+class _FiltersState extends ConsumerState<Filters> {
+  bool _enrolledOnly = false;
+  bool _internationalSpecified = false;
+  final Map<String, Map<String, bool>> filters = {
+    '学年': {'1年': false, '2年': false, '3年': false, '4年': false},
+    '学期': {'後期前': false, '後期後': false, '後期': false, '後集中': false, '通年': false},
+    '分類': {
+      '教養科目': false,
+      '体育科目': false,
+      '外国語科目': false,
+      'PBL科目': false,
+      '情報工学基盤': false,
+      '専門': false,
+      '教職科目': false,
+    },
+    '必選': {'必修': false, '選択必修': false, '選択': false}
+  };
+  final List<String> _internationalCodes = const [
+    's21311',
+    's22211',
+    's23311',
+    's24311',
+    's21321',
+    's22221',
+    's23321',
+    's24321'
+  ];
+  @override
+  Widget build(BuildContext context) {
     final CourseListNotifier notifier =
         ref.read(courseListNotifierProvider.notifier);
-    return isPortrait
+    return widget.isPortrait
         ? Row(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: items.entries
-                .map(
-                  (entry) => Row(
-                    children: [
-                      Text(entry.key),
-                      FilterButton(
-                          title: entry.key,
-                          items: entry.value,
-                          onChanged: (bool? value) {
-                            notifier.setFilters(items);
-                          }),
-                    ],
-                  ),
-                )
-                .toList(),
+            children: [
+              ...filters.entries.map(
+                (entry) => Row(
+                  children: [
+                    Text(entry.key),
+                    FilterButton(
+                        title: entry.key,
+                        items: entry.value,
+                        onChanged: (bool? value) {
+                          notifier.setFilters(filters);
+                        }),
+                  ],
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  notifier.setFilters(filters);
+                },
+                child: const Text('リセット'),
+              ),
+            ],
           )
         : Column(
-            children: items.entries
-                .map((entry) => FilterTile(
-                      title: entry.key,
-                      items: entry.value,
-                      onChanged: (bool? value) {
-                        notifier.setFilters(items);
-                      },
-                    ))
-                .toList(),
+            children: [
+              ListTile(
+                title: const Text('フィルター'),
+                dense: true,
+                trailing: ButtonTheme(
+                  child: TextButton(
+                    onPressed: () {
+                      setState(() {
+                        _enrolledOnly = false;
+                        _internationalSpecified = false;
+                        for (final Map<String, bool> item in filters.values) {
+                          for (final String key in item.keys) {
+                            item[key] = false;
+                          }
+                        }
+                      });
+                      notifier.setEnrolledOnly(false);
+                      notifier.setInternationalSpecified(false);
+                      notifier.setFilters(filters);
+                      notifier.applyFilter();
+                    },
+                    child: const Text('リセット', style: TextStyle(fontSize: 12)),
+                  ),
+                ),
+              ),
+              CheckboxListTile(
+                controlAffinity: ListTileControlAffinity.leading,
+                title: const Text('登録済み'),
+                dense: true,
+                value: _enrolledOnly,
+                onChanged: (bool? value) {
+                  setState(() {
+                    _enrolledOnly = value!;
+                  });
+                  notifier.setEnrolledOnly(value!);
+                  notifier.applyFilter();
+                },
+              ),
+              if (_internationalCodes.contains(widget.crclumcd))
+                CheckboxListTile(
+                  controlAffinity: ListTileControlAffinity.leading,
+                  title: const Text('国際コース\n指定科目'),
+                  dense: true,
+                  value: _internationalSpecified,
+                  onChanged: (bool? value) {
+                    setState(() {
+                      _internationalSpecified = value!;
+                    });
+                    notifier.setInternationalSpecified(value!);
+                    notifier.applyFilter();
+                  },
+                ),
+              ...filters.entries.map((entry) => FilterTile(
+                    title: entry.key,
+                    items: entry.value,
+                    onChanged: (bool? value) {
+                      notifier.setFilters(filters);
+                      notifier.applyFilter();
+                    },
+                  ))
+            ],
           );
   }
 }
