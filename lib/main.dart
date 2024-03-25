@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart' hide EmailAuthProvider;
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:firebase_ui_oauth_google/firebase_ui_oauth_google.dart';
 import 'package:firebase_ui_localizations/firebase_ui_localizations.dart';
@@ -23,8 +24,46 @@ final GoRouter _router = GoRouter(
     GoRoute(path: '/', builder: (context, state) => const HomePage(), routes: [
       GoRoute(
         path: 'login',
-        builder: (context, state) => const AuthGate(),
-      )
+        builder: (context, state) => Scaffold(
+          appBar: AppBar(
+            title: const Text('ログイン'),
+          ),
+          body: SignInScreen(
+            providers: [
+              EmailAuthProvider(),
+              GoogleProvider(
+                clientId: Env.webGoogleClientId,
+              )
+            ],
+            actions: [
+              AuthStateChangeAction<SignedIn>((context, _) {
+                context.pop();
+              }),
+            ],
+          ),
+        ),
+      ),
+      GoRoute(
+        path: 'profile',
+        builder: (context, state) => ProfileScreen(
+          appBar: AppBar(
+            title: const Text('プロフィール'),
+          ),
+          providers: [
+            EmailAuthProvider(),
+            GoogleProvider(
+              clientId: Env.webGoogleClientId,
+            )
+          ],
+          actions: [
+            SignedOutAction((context) {
+              context.pop();
+            }),
+          ],
+          showDeleteConfirmationDialog: true,
+          showUnlinkConfirmationDialog: true,
+        ),
+      ),
     ])
   ],
 );
@@ -133,7 +172,8 @@ class _HomePageState extends ConsumerState<HomePage> {
   Widget build(BuildContext context) {
     final Size screenSize = MediaQuery.of(context).size;
     final bool isPortrait = ((screenSize.width - 80) / screenSize.height) < 1;
-    final bool loggedIn = ref.watch(authProvider).currentUser != null;
+    final User? user = ref.watch(authProvider).currentUser;
+    final bool loggedIn = user != null;
     return Scaffold(
       appBar: isPortrait
           ? AppBar(
@@ -259,8 +299,12 @@ class _HomePageState extends ConsumerState<HomePage> {
                     const NavigationRailExpanded(child: Divider()),
                     Theme.of(context).brightness == Brightness.dark
                         ? NavigationRailButton(
-                            icon: const Icon(Icons.light_mode),
-                            buttonStyleButton: FilledButton.tonalIcon(
+                            icon: IconButton(
+                              icon: const Icon(Icons.light_mode),
+                              onPressed: () =>
+                                  setThemeMode(ThemeMode.light.index),
+                            ),
+                            button: FilledButton.tonalIcon(
                               onPressed: () =>
                                   setThemeMode(ThemeMode.light.index),
                               icon: const Icon(Icons.light_mode),
@@ -268,8 +312,11 @@ class _HomePageState extends ConsumerState<HomePage> {
                             ),
                           )
                         : NavigationRailButton(
-                            icon: const Icon(Icons.dark_mode),
-                            buttonStyleButton: FilledButton.tonalIcon(
+                            icon: IconButton(
+                                icon: const Icon(Icons.dark_mode),
+                                onPressed: () =>
+                                    setThemeMode(ThemeMode.dark.index)),
+                            button: FilledButton.tonalIcon(
                               onPressed: () =>
                                   setThemeMode(ThemeMode.dark.index),
                               icon: const Icon(Icons.dark_mode),
@@ -278,16 +325,39 @@ class _HomePageState extends ConsumerState<HomePage> {
                           ),
                     loggedIn
                         ? NavigationRailButton(
-                            icon: const Icon(Icons.logout),
-                            buttonStyleButton: OutlinedButton.icon(
-                              onPressed: () => logout(),
-                              icon: const Icon(Icons.logout),
-                              label: const Text('ログアウト'),
+                            icon: IconButton(
+                              icon: Padding(
+                                padding: const EdgeInsets.all(2.0),
+                                child: user.photoURL != null
+                                    ? CircleAvatar(
+                                        backgroundImage:
+                                            NetworkImage(user.photoURL!),
+                                      )
+                                    : const CircleAvatar(
+                                        child: Icon(Icons.person)),
+                              ),
+                              onPressed: () => context.push('/profile'),
+                            ),
+                            button: SizedBox(
+                              width: 256,
+                              child: ListTile(
+                                dense: true,
+                                onTap: () => context.push('/profile'),
+                                leading: user.photoURL != null
+                                    ? CircleAvatar(
+                                        backgroundImage:
+                                            NetworkImage(user.photoURL!),
+                                      )
+                                    : const CircleAvatar(
+                                        child: Icon(Icons.person)),
+                                title: Text(user.displayName ?? '名称未設定'),
+                                subtitle: Text(user.email ?? ''),
+                              ),
                             ),
                           )
                         : NavigationRailButton(
                             icon: const Icon(Icons.login),
-                            buttonStyleButton: OutlinedButton.icon(
+                            button: OutlinedButton.icon(
                               onPressed: () => login(),
                               icon: const Icon(Icons.login),
                               label: const Text('ログイン'),
@@ -309,10 +379,9 @@ class _HomePageState extends ConsumerState<HomePage> {
 }
 
 class NavigationRailButton extends StatelessWidget {
-  const NavigationRailButton(
-      {super.key, this.icon, required this.buttonStyleButton});
-  final Icon? icon;
-  final ButtonStyleButton buttonStyleButton;
+  const NavigationRailButton({super.key, this.icon, required this.button});
+  final Widget? icon;
+  final Widget? button;
   @override
   Widget build(BuildContext context) {
     final Animation<double> animation =
@@ -323,10 +392,7 @@ class NavigationRailButton extends StatelessWidget {
         if (animation.value == 0) {
           return Padding(
             padding: const EdgeInsets.symmetric(vertical: 2.0),
-            child: icon == null
-                ? null
-                : IconButton(
-                    onPressed: buttonStyleButton.onPressed, icon: icon!),
+            child: icon,
           );
         } else {
           final Animation<double> labelFadeAnimation =
@@ -345,7 +411,7 @@ class NavigationRailButton extends StatelessWidget {
                   child: FadeTransition(
                     alwaysIncludeSemantics: true,
                     opacity: labelFadeAnimation,
-                    child: buttonStyleButton,
+                    child: button,
                   )),
             )),
           );
