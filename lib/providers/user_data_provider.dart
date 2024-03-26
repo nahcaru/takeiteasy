@@ -68,11 +68,19 @@ class UserDataNotifier extends AsyncNotifier<UserData> {
   Future<void> _updateData(Map<String, dynamic> data) async {
     User? user = ref.watch(authProvider).currentUser;
     if (user != null) {
-      await ref
-          .watch(fireStoreProvider)
-          .collection('users')
-          .doc(user.uid)
-          .update(data);
+      try {
+        await ref
+            .watch(fireStoreProvider)
+            .collection('users')
+            .doc(user.uid)
+            .update(data);
+      } catch (error) {
+        await ref
+            .watch(fireStoreProvider)
+            .collection('users')
+            .doc(user.uid)
+            .set(data);
+      }
     }
   }
 
