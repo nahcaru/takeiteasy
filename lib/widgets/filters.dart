@@ -63,7 +63,7 @@ class _FiltersState extends ConsumerState<Filters> {
   bool _internationalSpecified = false;
   final Map<String, Map<String, bool>> filters = {
     '学年': {'1年': false, '2年': false, '3年': false, '4年': false},
-    '学期': {'後期前': false, '後期後': false, '後期': false, '後集中': false, '通年': false},
+    '学期': {'前期前': false, '前期後': false, '前期': false, '前集中': false, '通年': false},
     '分類': {
       '教養科目': false,
       '体育科目': false,

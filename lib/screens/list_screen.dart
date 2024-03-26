@@ -93,7 +93,7 @@ class ListScreen extends ConsumerWidget {
                         ? Center(
                             child: data.crclumcd == null
                                 ? const Text('カリキュラムを選択してください')
-                                : const Text('該当する授業がありません'))
+                                : const Text('該当する科目がありません'))
                         : ListView.builder(
                             padding: const EdgeInsets.symmetric(horizontal: 8),
                             itemCount: courseList.length,

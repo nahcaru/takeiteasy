@@ -37,7 +37,7 @@ class CourseListNotifier extends Notifier<List<Course>> {
   bool _enrolledOnly = false;
   final Map<String, Map<String, bool>> _filters = {
     '学年': {'1年': false, '2年': false, '3年': false, '4年': false},
-    '学期': {'後期前': false, '後期後': false, '後期': false, '後集中': false, '通年': false},
+    '学期': {'前期前': false, '前期後': false, '前期': false, '前集中': false, '通年': false},
     '分類': {
       '教養科目': false,
       '体育科目': false,
@@ -126,6 +126,17 @@ class CourseListNotifier extends Notifier<List<Course>> {
 
   void sortPeriods() {
     const daysOrder = ['月', '火', '水', '木', '金', '土', ''];
+    const termOrder = [
+      '前期',
+      '前期前',
+      '前期後',
+      '前集中',
+      '後期',
+      '後期前',
+      '後期後',
+      '後集中',
+      '通年',
+    ];
     _courses.sort((a, b) {
       String aPeriod = a.period.firstOrNull ?? '';
       String bPeriod = b.period.firstOrNull ?? '';
@@ -145,7 +156,14 @@ class CourseListNotifier extends Notifier<List<Course>> {
         } else {
           int aTime = int.tryParse(aPeriod[1]) ?? 0;
           int bTime = int.tryParse(bPeriod[1]) ?? 0;
-          return aTime.compareTo(bTime);
+          int timeComparison = aTime.compareTo(bTime);
+          if (timeComparison != 0) {
+            return timeComparison;
+          } else {
+            return termOrder
+                .indexOf(a.term)
+                .compareTo(termOrder.indexOf(b.term));
+          }
         }
       }
     });
@@ -196,9 +214,9 @@ class CourseListNotifier extends Notifier<List<Course>> {
           .toList();
     }
     return targetCourses.where((course) {
-      bool gradeFilter = _filters['学年']!['${course.grade}年']! ||
+      bool gradeFilter = (_filters['学年']!['${course.grade}年'] ?? false) ||
           _filters['学年']!.values.every((element) => element == false);
-      bool termFilter = _filters['学期']![course.term]! ||
+      bool termFilter = (_filters['学期']![course.term] ?? false) ||
           _filters['学期']!.values.every((element) => element == false);
       String? crclumcd = ref.watch(userDataNotifierProvider
           .select((asyncValue) => asyncValue.value?.crclumcd));
@@ -208,10 +226,12 @@ class CourseListNotifier extends Notifier<List<Course>> {
       bool compulsorinessFilter;
       if (course.compulsoriness[crclumcd] == '必修') {
         compulsorinessFilter = _filters['必選']!['必修']!;
-      } else if (course.compulsoriness[crclumcd]!.contains('選択必修')) {
+      } else if (course.compulsoriness[crclumcd]?.contains('選択必修') ?? false) {
         compulsorinessFilter = _filters['必選']!['選択必修']!;
-      } else {
+      } else if (course.compulsoriness[crclumcd] != null) {
         compulsorinessFilter = _filters['必選']!['選択']!;
+      } else {
+        compulsorinessFilter = false;
       }
       compulsorinessFilter = compulsorinessFilter ||
           _filters['必選']!.values.every((element) => element == false);

@@ -36,7 +36,7 @@ class _CourseCardState extends ConsumerState<CourseCard> {
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
                         Text(
-                            '講義コード\n${widget.course.code}\n\n教室\n${widget.course.room}\n\n担当者\n${widget.course.lecturer}'),
+                            '講義コード\n${widget.course.code}\n\n教室\n${widget.course.room.join('\n')}\n\n担当者\n${widget.course.lecturer.join('\n')}'),
                       ],
                     ),
                   ),
@@ -99,11 +99,10 @@ class _CourseCardState extends ConsumerState<CourseCard> {
                                     child: Container(),
                                   ),
                                   Text(
-                                    '${[
-                                      widget.course.category[data.crclumcd],
-                                      widget
-                                          .course.compulsoriness[data.crclumcd]
-                                    ].join('・')} ${widget.course.credits[data.crclumcd] ?? '-'}単位',
+                                    widget.course.category[data.crclumcd] !=
+                                            null
+                                        ? '${widget.course.category[data.crclumcd]}・${widget.course.compulsoriness[data.crclumcd]} ${widget.course.credits[data.crclumcd] ?? '-'}単位'
+                                        : 'シラバス未公開',
                                     style:
                                         Theme.of(context).textTheme.labelMedium,
                                   ),
@@ -164,7 +163,7 @@ class _CourseCardState extends ConsumerState<CourseCard> {
                                     host: 'websrv.tcu.ac.jp',
                                     path: '/tcu_web_v3/slbssbdr.do',
                                     queryParameters: {
-                                      'value(risyunen)': '2023',
+                                      'value(risyunen)': '2024',
                                       'value(semekikn)': '1',
                                       'value(kougicd)': widget.course.code,
                                       'value(crclumcd)': data.crclumcd,
@@ -200,11 +199,11 @@ class _CourseCardState extends ConsumerState<CourseCard> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                widget.course.category[data.crclumcd] ?? '',
+                                widget.course.category[data.crclumcd] ?? 'シラバス',
                               ),
                               Text(
                                 widget.course.compulsoriness[data.crclumcd] ??
-                                    '',
+                                    '未公開',
                               ),
                             ],
                           ),

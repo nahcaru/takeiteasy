@@ -30,7 +30,8 @@ class Course {
         early = json['early'],
         altName = json['altName'],
         altTarget = List.from(json['altTarget']),
-        category = Map.from(json['category']),
-        compulsoriness = Map.from(json['compulsory']),
-        credits = Map.from(json['credits']);
+        category = json['category'] != null ? Map.from(json['category']) : {},
+        compulsoriness =
+            json['compulsory'] != null ? Map.from(json['compulsory']) : {},
+        credits = json['credits'] != null ? Map.from(json['credits']) : {};
 }
