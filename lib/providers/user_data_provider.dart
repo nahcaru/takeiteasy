@@ -9,6 +9,20 @@ final authProvider = StateProvider<FirebaseAuth>((ref) {
   return FirebaseAuth.instance;
 });
 
+final authenticatorProvider = StateNotifierProvider<AuthController, User?>(
+  (ref) => AuthController(initialUser: FirebaseAuth.instance.currentUser),
+);
+
+class AuthController extends StateNotifier<User?> {
+  AuthController({User? initialUser}) : super(initialUser) {
+    _auth.userChanges().listen((user) {
+      state = user;
+    });
+  }
+
+  final _auth = FirebaseAuth.instance;
+}
+
 final fireStoreProvider = StateProvider<FirebaseFirestore>((ref) {
   return FirebaseFirestore.instance;
 });
@@ -21,7 +35,7 @@ final userDataNotifierProvider =
 class UserDataNotifier extends AsyncNotifier<UserData> {
   @override
   FutureOr<UserData> build() async {
-    User? user = ref.watch(authProvider).currentUser;
+    User? user = ref.watch(authenticatorProvider);
     int? themeModeIndex;
     String? crclumcd;
     List<String>? enrolledCourses;
@@ -66,7 +80,7 @@ class UserDataNotifier extends AsyncNotifier<UserData> {
   }
 
   Future<void> _updateData(Map<String, dynamic> data) async {
-    User? user = ref.watch(authProvider).currentUser;
+    User? user = ref.watch(authenticatorProvider);
     if (user != null) {
       try {
         await ref

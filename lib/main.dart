@@ -4,12 +4,14 @@ import 'package:firebase_auth/firebase_auth.dart' hide EmailAuthProvider;
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:firebase_ui_oauth_google/firebase_ui_oauth_google.dart';
 import 'package:firebase_ui_localizations/firebase_ui_localizations.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/link.dart';
 
 import 'env/env.dart';
 import 'firebase_options.dart';
@@ -37,7 +39,7 @@ final GoRouter _router = GoRouter(
             ],
             actions: [
               AuthStateChangeAction<SignedIn>((context, _) {
-                context.pop();
+                context.pushReplacement('/');
               }),
             ],
           ),
@@ -57,7 +59,7 @@ final GoRouter _router = GoRouter(
           ],
           actions: [
             SignedOutAction((context) {
-              context.pop();
+              context.pushReplacement('/');
             }),
           ],
           showDeleteConfirmationDialog: true,
@@ -118,31 +120,6 @@ class MyApp extends ConsumerWidget {
   }
 }
 
-class AuthGate extends StatelessWidget {
-  const AuthGate({super.key});
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('ログイン'),
-      ),
-      body: SignInScreen(
-        providers: [
-          EmailAuthProvider(),
-          GoogleProvider(
-            clientId: Env.webGoogleClientId,
-          )
-        ],
-        actions: [
-          AuthStateChangeAction<SignedIn>((context, _) {
-            context.pop();
-          }),
-        ],
-      ),
-    );
-  }
-}
-
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({
     super.key,
@@ -172,7 +149,7 @@ class _HomePageState extends ConsumerState<HomePage> {
   Widget build(BuildContext context) {
     final Size screenSize = MediaQuery.of(context).size;
     final bool isPortrait = ((screenSize.width - 80) / screenSize.height) < 1;
-    final User? user = ref.watch(authProvider).currentUser;
+    final User? user = ref.watch(authenticatorProvider);
     final bool loggedIn = user != null;
     return Scaffold(
       appBar: isPortrait
@@ -254,20 +231,27 @@ class _HomePageState extends ConsumerState<HomePage> {
                 elevation: 1,
                 leading: Column(
                   children: [
-                    NavigationRailExpanded(
+                    Container(
                       height: 44,
-                      child: Row(
-                        children: [
-                          const SizedBox(
-                            width: (80 - 31.689971923828124) / 2,
+                      alignment: Alignment.center,
+                      child: NavigationRailButton(
+                        icon: Text(
+                          'TiE',
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.primary,
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
                           ),
-                          Expanded(
-                            child: Align(
+                        ),
+                        button: Row(
+                          children: [
+                            const SizedBox(
+                              width: (80 - 31.689971923828124) / 2,
+                            ),
+                            Align(
                               alignment: Alignment.center,
                               child: Text(
-                                extended ? 'Take it Easy' : 'TiE',
-                                maxLines: 1,
-                                overflow: TextOverflow.clip,
+                                'Take it Easy',
                                 style: TextStyle(
                                   color: Theme.of(context).colorScheme.primary,
                                   fontSize: 20,
@@ -275,9 +259,10 @@ class _HomePageState extends ConsumerState<HomePage> {
                                 ),
                               ),
                             ),
-                          ),
-                          const SizedBox(width: (80 - 31.689971923828124) / 2),
-                        ],
+                            const SizedBox(
+                                width: (80 - 31.689971923828124) / 2),
+                          ],
+                        ),
                       ),
                     ),
                     const NavigationRailExpanded(child: Divider()),
@@ -356,13 +341,57 @@ class _HomePageState extends ConsumerState<HomePage> {
                             ),
                           )
                         : NavigationRailButton(
-                            icon: const Icon(Icons.login),
-                            button: OutlinedButton.icon(
-                              onPressed: () => login(),
+                            icon: IconButton(
                               icon: const Icon(Icons.login),
-                              label: const Text('ログイン'),
+                              onPressed: () => login(),
+                            ),
+                            button: Column(
+                              children: [
+                                OutlinedButton.icon(
+                                  onPressed: () => login(),
+                                  icon: const Icon(Icons.login),
+                                  label: const Text('ログイン'),
+                                ),
+                                const SizedBox(height: 8.0),
+                                Text(
+                                  'ログインすると時間割を保存できます',
+                                  style: Theme.of(context).textTheme.bodySmall,
+                                ),
+                              ],
                             ),
                           ),
+                    const NavigationRailExpanded(child: Divider()),
+                    NavigationRailButton(
+                      button: SizedBox(
+                        width: 256,
+                        child: Column(
+                          children: [
+                            const Text('最終更新日:2024/03/28'),
+                            const SizedBox(height: 8.0),
+                            Link(
+                              uri: Uri.parse(
+                                  'https://docs.google.com/forms/d/e/1FAIpQLSex6MZTFS4euAd3VvG7n3ZSDVOxC-n8y1ELLFTJJ5E-yoH8PA/viewform?usp=sf_link'),
+                              builder: (BuildContext context,
+                                      FollowLink? followLink) =>
+                                  Text.rich(
+                                TextSpan(
+                                  text: 'お問い合わせ',
+                                  style: TextStyle(
+                                    color:
+                                        Theme.of(context).colorScheme.primary,
+                                  ),
+                                  recognizer: TapGestureRecognizer()
+                                    ..onTap = () => followLink,
+                                ),
+                                style: TextStyle(
+                                  color: Theme.of(context).colorScheme.primary,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
