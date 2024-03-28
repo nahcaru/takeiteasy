@@ -1,4 +1,3 @@
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/link.dart';
@@ -23,28 +22,28 @@ class _CourseCardState extends ConsumerState<CourseCard> {
     final Size screenSize = MediaQuery.of(context).size;
     final bool isPortrait = ((screenSize.width - 280) / screenSize.height) < 1;
     return asyncValue.when(
-      data: (data) => Card(
-        child: InkWell(
-          onTap: () {
-            showDialog(
-              context: context,
-              builder: (BuildContext context) {
-                return AlertDialog(
-                  title: Text(widget.course.name),
-                  content: SelectionArea(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Text(
-                            '講義コード\n${widget.course.code}\n\n教室\n${widget.course.room.join('\n')}\n\n担当者\n${widget.course.lecturer.join('\n')}'),
-                      ],
-                    ),
+      data: (data) => InkWell(
+        onTap: () {
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: Text(widget.course.name),
+                content: SelectionArea(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Text(
+                          '講義コード\n${widget.course.code}\n\n教室\n${widget.course.room.join('\n')}\n\n担当者\n${widget.course.lecturer.join('\n')}'),
+                    ],
                   ),
-                  scrollable: true,
-                );
-              },
-            );
-          },
+                ),
+                scrollable: true,
+              );
+            },
+          );
+        },
+        child: Card(
           child: Padding(
               padding: const EdgeInsets.all(8),
               child: Row(
@@ -70,11 +69,13 @@ class _CourseCardState extends ConsumerState<CourseCard> {
                                       'value(kougicd)': widget.course.code,
                                       'value(crclumcd)': data.crclumcd,
                                     }),
+                                target: LinkTarget.blank,
                                 builder: (BuildContext context,
                                         FollowLink? followLink) =>
-                                    Text.rich(
-                                  TextSpan(
-                                    text: widget.course.name,
+                                    InkWell(
+                                  onTap: followLink,
+                                  child: Text(
+                                    widget.course.name,
                                     style: Theme.of(context)
                                         .textTheme
                                         .titleMedium!
@@ -83,8 +84,6 @@ class _CourseCardState extends ConsumerState<CourseCard> {
                                               .colorScheme
                                               .primary,
                                         ),
-                                    recognizer: TapGestureRecognizer()
-                                      ..onTap = () => followLink,
                                   ),
                                 ),
                               ),
@@ -168,11 +167,13 @@ class _CourseCardState extends ConsumerState<CourseCard> {
                                       'value(kougicd)': widget.course.code,
                                       'value(crclumcd)': data.crclumcd,
                                     }),
+                                target: LinkTarget.blank,
                                 builder: (BuildContext context,
                                         FollowLink? followLink) =>
-                                    Text.rich(
-                                  TextSpan(
-                                    text: widget.course.name,
+                                    InkWell(
+                                  onTap: followLink,
+                                  child: Text(
+                                    widget.course.name,
                                     style: Theme.of(context)
                                         .textTheme
                                         .titleLarge!
@@ -181,8 +182,6 @@ class _CourseCardState extends ConsumerState<CourseCard> {
                                               .colorScheme
                                               .primary,
                                         ),
-                                    recognizer: TapGestureRecognizer()
-                                      ..onTap = () => followLink,
                                   ),
                                 ),
                               ),

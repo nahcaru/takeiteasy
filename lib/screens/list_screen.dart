@@ -26,24 +26,45 @@ class ListScreen extends ConsumerWidget {
                   pinned: true,
                   floating: true,
                   toolbarHeight: 0,
-                  expandedHeight: isPortrait ? 136 : 56,
+                  expandedHeight: isPortrait ? 96 : 56,
                   scrolledUnderElevation: 0,
                   flexibleSpace: FlexibleSpaceBar(
                     background: isPortrait
                         ? Column(children: [
-                            ChoiceBox(crclumcd: data.crclumcd),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                ChoiceBox(crclumcd: data.crclumcd),
+                                const SizedBox(
+                                  width: 16,
+                                ),
+                                OutlinedButton(
+                                  style: OutlinedButton.styleFrom(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 12, vertical: 8),
+                                  ),
+                                  onPressed: () {
+                                    showModalBottomSheet(
+                                      context: context,
+                                      showDragHandle: true,
+                                      isScrollControlled: true,
+                                      builder: (BuildContext context) =>
+                                          SingleChildScrollView(
+                                        child: Filters(
+                                          crclumcd: data.crclumcd,
+                                          isPortrait: false,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  child: const Text('フィルター'),
+                                ),
+                              ],
+                            ),
                             const SizedBox(
                               height: 8,
                             ),
                             const SearchBox(),
-                            const SizedBox(
-                              height: 8,
-                            ),
-                            SingleChildScrollView(
-                              scrollDirection: Axis.horizontal,
-                              child: Filters(
-                                  crclumcd: data.crclumcd, isPortrait: true),
-                            ),
                           ])
                         : Align(
                             alignment: Alignment.center,

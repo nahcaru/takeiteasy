@@ -60,6 +60,7 @@ class Filters extends ConsumerStatefulWidget {
 
 class _FiltersState extends ConsumerState<Filters> {
   bool _enrolledOnly = false;
+  bool _blankOnly = false;
   bool _internationalSpecified = false;
   final Map<String, Map<String, bool>> filters = {
     '学年': {'1年': false, '2年': false, '3年': false, '4年': false},
@@ -124,6 +125,7 @@ class _FiltersState extends ConsumerState<Filters> {
                     onPressed: () {
                       setState(() {
                         _enrolledOnly = false;
+                        _blankOnly = false;
                         _internationalSpecified = false;
                         for (final Map<String, bool> item in filters.values) {
                           for (final String key in item.keys) {
@@ -132,6 +134,7 @@ class _FiltersState extends ConsumerState<Filters> {
                         }
                       });
                       notifier.setEnrolledOnly(false);
+                      notifier.setBlankOnly(false);
                       notifier.setInternationalSpecified(false);
                       notifier.setFilters(filters);
                       notifier.applyFilter();
@@ -153,10 +156,26 @@ class _FiltersState extends ConsumerState<Filters> {
                   notifier.applyFilter();
                 },
               ),
+              CheckboxListTile(
+                controlAffinity: ListTileControlAffinity.leading,
+                title: const Text('空きコマ'),
+                dense: true,
+                value: _blankOnly,
+                onChanged: (bool? value) {
+                  setState(() {
+                    _blankOnly = value!;
+                  });
+                  notifier.setBlankOnly(value!);
+                  notifier.applyFilter();
+                },
+              ),
               if (_internationalCodes.contains(widget.crclumcd))
                 CheckboxListTile(
                   controlAffinity: ListTileControlAffinity.leading,
-                  title: const Text('国際コース\n指定科目'),
+                  title: const FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: Text('国際コース指定科目')),
                   dense: true,
                   value: _internationalSpecified,
                   onChanged: (bool? value) {

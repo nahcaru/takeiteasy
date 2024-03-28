@@ -4,7 +4,6 @@ import 'package:firebase_auth/firebase_auth.dart' hide EmailAuthProvider;
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:firebase_ui_oauth_google/firebase_ui_oauth_google.dart';
 import 'package:firebase_ui_localizations/firebase_ui_localizations.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -39,7 +38,7 @@ final GoRouter _router = GoRouter(
             ],
             actions: [
               AuthStateChangeAction<SignedIn>((context, _) {
-                context.pushReplacement('/');
+                context.go('/');
               }),
             ],
           ),
@@ -59,7 +58,7 @@ final GoRouter _router = GoRouter(
           ],
           actions: [
             SignedOutAction((context) {
-              context.pushReplacement('/');
+              context.go('/');
             }),
           ],
           showDeleteConfirmationDialog: true,
@@ -132,15 +131,6 @@ class _HomePageState extends ConsumerState<HomePage> {
   int currentPageIndex = 0;
   bool extended = false;
 
-  void login() {
-    context.push('/login');
-  }
-
-  Future<void> logout() async {
-    await ref.watch(authProvider).signOut();
-    context.pushReplacement('/');
-  }
-
   void setThemeMode(int themeModeIndex) {
     ref.read(userDataNotifierProvider.notifier).setThemeMode(themeModeIndex);
   }
@@ -154,6 +144,7 @@ class _HomePageState extends ConsumerState<HomePage> {
     return Scaffold(
       appBar: isPortrait
           ? AppBar(
+              automaticallyImplyLeading: false,
               scrolledUnderElevation: 0,
               centerTitle: false,
               title: Text(
@@ -177,17 +168,57 @@ class _HomePageState extends ConsumerState<HomePage> {
                         onPressed: () => setThemeMode(ThemeMode.dark.index),
                         icon: const Icon(Icons.dark_mode),
                       ),
+                IconButton(
+                  icon: const Icon(Icons.info),
+                  onPressed: () => showDialog(
+                    context: context,
+                    builder: (BuildContext context) => AlertDialog(
+                        title: const Text('Take it Easy (Unofficial)'),
+                        content: SingleChildScrollView(
+                          child: Column(
+                            children: [
+                              const Text('時間割作成をもっと簡単に'),
+                              const Text('最終更新日:2024/03/28'),
+                              const SizedBox(height: 8.0),
+                              Link(
+                                uri: Uri.parse(
+                                    'https://docs.google.com/forms/d/e/1FAIpQLSex6MZTFS4euAd3VvG7n3ZSDVOxC-n8y1ELLFTJJ5E-yoH8PA/viewform?usp=sf_link'),
+                                target: LinkTarget.blank,
+                                builder: (BuildContext context,
+                                        FollowLink? followLink) =>
+                                    InkWell(
+                                  onTap: followLink,
+                                  child: Text(
+                                    'お問い合わせ',
+                                    style: TextStyle(
+                                      color:
+                                          Theme.of(context).colorScheme.primary,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        )),
+                  ),
+                ),
                 loggedIn
                     ? IconButton(
-                        tooltip: 'ログアウト',
-                        onPressed: () => logout(),
-                        icon: const Icon(
-                          Icons.logout,
+                        tooltip: 'プロフィール',
+                        onPressed: () => context.push('/profile'),
+                        icon: SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: user.photoURL != null
+                              ? CircleAvatar(
+                                  backgroundImage: NetworkImage(user.photoURL!),
+                                )
+                              : const CircleAvatar(child: Icon(Icons.person)),
                         ),
                       )
                     : IconButton(
                         tooltip: 'ログイン',
-                        onPressed: () async => login(),
+                        onPressed: () => context.push('/login'),
                         icon: const Icon(
                           Icons.login,
                         ),
@@ -343,12 +374,12 @@ class _HomePageState extends ConsumerState<HomePage> {
                         : NavigationRailButton(
                             icon: IconButton(
                               icon: const Icon(Icons.login),
-                              onPressed: () => login(),
+                              onPressed: () => context.push('/login'),
                             ),
                             button: Column(
                               children: [
                                 OutlinedButton.icon(
-                                  onPressed: () => login(),
+                                  onPressed: () => context.push('/login'),
                                   icon: const Icon(Icons.login),
                                   label: const Text('ログイン'),
                                 ),
@@ -362,6 +393,41 @@ class _HomePageState extends ConsumerState<HomePage> {
                           ),
                     const NavigationRailExpanded(child: Divider()),
                     NavigationRailButton(
+                      icon: IconButton(
+                        icon: const Icon(Icons.info),
+                        onPressed: () => showDialog(
+                          context: context,
+                          builder: (BuildContext context) => AlertDialog(
+                              title: const Text('Take it Easy (Unofficial)'),
+                              content: SingleChildScrollView(
+                                child: Column(
+                                  children: [
+                                    const Text('時間割作成をもっと簡単に'),
+                                    const Text('最終更新日:2024/03/28'),
+                                    const SizedBox(height: 8.0),
+                                    Link(
+                                      uri: Uri.parse(
+                                          'https://docs.google.com/forms/d/e/1FAIpQLSex6MZTFS4euAd3VvG7n3ZSDVOxC-n8y1ELLFTJJ5E-yoH8PA/viewform?usp=sf_link'),
+                                      target: LinkTarget.blank,
+                                      builder: (BuildContext context,
+                                              FollowLink? followLink) =>
+                                          InkWell(
+                                        onTap: followLink,
+                                        child: Text(
+                                          'お問い合わせ',
+                                          style: TextStyle(
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .primary,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              )),
+                        ),
+                      ),
                       button: SizedBox(
                         width: 256,
                         child: Column(
@@ -371,20 +437,17 @@ class _HomePageState extends ConsumerState<HomePage> {
                             Link(
                               uri: Uri.parse(
                                   'https://docs.google.com/forms/d/e/1FAIpQLSex6MZTFS4euAd3VvG7n3ZSDVOxC-n8y1ELLFTJJ5E-yoH8PA/viewform?usp=sf_link'),
+                              target: LinkTarget.blank,
                               builder: (BuildContext context,
                                       FollowLink? followLink) =>
-                                  Text.rich(
-                                TextSpan(
-                                  text: 'お問い合わせ',
+                                  InkWell(
+                                onTap: followLink,
+                                child: Text(
+                                  'お問い合わせ',
                                   style: TextStyle(
                                     color:
                                         Theme.of(context).colorScheme.primary,
                                   ),
-                                  recognizer: TapGestureRecognizer()
-                                    ..onTap = () => followLink,
-                                ),
-                                style: TextStyle(
-                                  color: Theme.of(context).colorScheme.primary,
                                 ),
                               ),
                             ),

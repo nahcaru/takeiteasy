@@ -74,6 +74,7 @@ class CourseListNotifier extends Notifier<List<Course>> {
     'Language Sciences(2a)',
     'Language Sciences(2b)',
   ];
+  bool _blankOnly = false;
 
   @override
   List<Course> build() {
@@ -184,6 +185,10 @@ class CourseListNotifier extends Notifier<List<Course>> {
     _internationalSpecified = value;
   }
 
+  void setBlankOnly(bool value) {
+    _blankOnly = value;
+  }
+
   void search(String text) {
     _searchText = text;
     applyFilter();
@@ -206,6 +211,33 @@ class CourseListNotifier extends Notifier<List<Course>> {
       targetCourses = targetCourses
           .where((course) => enrolledCourses?.contains(course.code) ?? false)
           .toList();
+    }
+    List<String>? enrolledCourses = ref.watch(userDataNotifierProvider
+        .select((asyncValue) => asyncValue.value?.enrolledCourses));
+    List<String> formerTerms = const ['前期', '前期前', '後期', '後期前'];
+    List<String> latterTerms = const ['前期', '前期後', '後期', '後期後'];
+    Set<String>? formerEnrolledPeriods =
+        getCoursesByTerms(enrolledCourses ?? [], formerTerms)
+            .map((course) => course.period)
+            .expand((element) => element)
+            .toSet();
+    Set<String>? latterEnrolledPeriods =
+        getCoursesByTerms(enrolledCourses ?? [], latterTerms)
+            .map((course) => course.period)
+            .expand((element) => element)
+            .toSet();
+    if (_blankOnly) {
+      targetCourses = targetCourses.where((course) {
+        if (formerTerms.contains(course.term)) {
+          return course.period
+              .every((period) => !formerEnrolledPeriods.contains(period));
+        } else if (latterTerms.contains(course.term)) {
+          return course.period
+              .every((period) => !latterEnrolledPeriods.contains(period));
+        } else {
+          return true;
+        }
+      }).toList();
     }
     if (_internationalSpecified) {
       targetCourses = targetCourses

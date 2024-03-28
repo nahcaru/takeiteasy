@@ -5,7 +5,7 @@
     "display": "standalone",
     "background_color": "#00A7EB",
     "theme_color": "#00A7EB",
-    "description": "履修登録をもっと簡単に",
+    "description": "時間割作成をもっと簡単に",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
