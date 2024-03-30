@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/course.dart';
+import '../widgets/course_dialog.dart';
 
 class CourseTable extends StatelessWidget {
   const CourseTable({
@@ -142,19 +143,7 @@ class TableCard extends StatelessWidget {
           showDialog(
             context: context,
             builder: (BuildContext context) {
-              return AlertDialog(
-                title: Text(data.first.name),
-                content: SelectionArea(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Text(
-                          '講義コード\n${data.first.code}\n\n教室\n${data.first.room}\n\n担当者\n${data.first.lecturer}'),
-                    ],
-                  ),
-                ),
-                scrollable: true,
-              );
+              return CourseDialog(data.first);
             },
           );
         },

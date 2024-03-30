@@ -4,18 +4,14 @@ import 'package:url_launcher/link.dart';
 import '../models/course.dart';
 import '../models/user_data.dart';
 import '../providers/user_data_provider.dart';
+import '../widgets/course_dialog.dart';
 
-class CourseCard extends ConsumerStatefulWidget {
+class CourseCard extends ConsumerWidget {
   const CourseCard({super.key, required this.course});
   final Course course;
 
   @override
-  ConsumerState<CourseCard> createState() => _CourseCardState();
-}
-
-class _CourseCardState extends ConsumerState<CourseCard> {
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final AsyncValue<UserData> asyncValue = ref.watch(userDataNotifierProvider);
     final UserDataNotifier notifier =
         ref.read(userDataNotifierProvider.notifier);
@@ -27,19 +23,7 @@ class _CourseCardState extends ConsumerState<CourseCard> {
           showDialog(
             context: context,
             builder: (BuildContext context) {
-              return AlertDialog(
-                title: Text(widget.course.name),
-                content: SelectionArea(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Text(
-                          '講義コード\n${widget.course.code}\n\n教室\n${widget.course.room.join('\n')}\n\n担当者\n${widget.course.lecturer.join('\n')}'),
-                    ],
-                  ),
-                ),
-                scrollable: true,
-              );
+              return CourseDialog(course);
             },
           );
         },
@@ -55,7 +39,7 @@ class _CourseCardState extends ConsumerState<CourseCard> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                '${widget.course.term} ${widget.course.period.join(',')} ${widget.course.class_}',
+                                '${course.term} ${course.period.join(',')} ${course.class_}',
                                 style: Theme.of(context).textTheme.labelMedium,
                               ),
                               Link(
@@ -64,9 +48,9 @@ class _CourseCardState extends ConsumerState<CourseCard> {
                                     host: 'websrv.tcu.ac.jp',
                                     path: '/tcu_web_v3/slbssbdr.do',
                                     queryParameters: {
-                                      'value(risyunen)': '2023',
+                                      'value(risyunen)': '2024',
                                       'value(semekikn)': '1',
-                                      'value(kougicd)': widget.course.code,
+                                      'value(kougicd)': course.code,
                                       'value(crclumcd)': data.crclumcd,
                                     }),
                                 target: LinkTarget.blank,
@@ -75,7 +59,13 @@ class _CourseCardState extends ConsumerState<CourseCard> {
                                     InkWell(
                                   onTap: followLink,
                                   child: Text(
-                                    widget.course.name,
+                                    course.altTarget.any((target) =>
+                                            target != "" &&
+                                            (data.crclumcd
+                                                    ?.startsWith(target) ??
+                                                false))
+                                        ? course.altName
+                                        : course.name,
                                     style: Theme.of(context)
                                         .textTheme
                                         .titleMedium!
@@ -89,18 +79,40 @@ class _CourseCardState extends ConsumerState<CourseCard> {
                               ),
                               Row(
                                 children: [
-                                  Text(
-                                    widget.course.note,
-                                    style:
-                                        Theme.of(context).textTheme.labelMedium,
-                                  ),
+                                  if (course.early || course.note != '')
+                                    Text(
+                                      '(',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .labelMedium,
+                                    ),
+                                  if (course.early)
+                                    Text(
+                                      '9:00開始',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .labelMedium,
+                                    ),
+                                  if (course.note != '')
+                                    Text(
+                                      course.note,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .labelMedium,
+                                    ),
+                                  if (course.early || course.note != '')
+                                    Text(
+                                      ')',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .labelMedium,
+                                    ),
                                   Expanded(
                                     child: Container(),
                                   ),
                                   Text(
-                                    widget.course.category[data.crclumcd] !=
-                                            null
-                                        ? '${widget.course.category[data.crclumcd]}・${widget.course.compulsoriness[data.crclumcd]} ${widget.course.credits[data.crclumcd] ?? '-'}単位'
+                                    course.category[data.crclumcd] != null
+                                        ? '${course.category[data.crclumcd]}・${course.compulsoriness[data.crclumcd]} ${course.credits[data.crclumcd] ?? '-'}単位'
                                         : 'シラバス未公開',
                                     style:
                                         Theme.of(context).textTheme.labelMedium,
@@ -113,18 +125,15 @@ class _CourseCardState extends ConsumerState<CourseCard> {
                         const SizedBox(
                           width: 8,
                         ),
-                        (data.enrolledCourses?.contains(widget.course.code) ??
-                                false)
+                        (data.enrolledCourses?.contains(course.code) ?? false)
                             ? IconButton.outlined(
-                                onPressed: () => setState(() {
-                                  notifier.removeCourse(widget.course.code);
-                                }),
+                                onPressed: () =>
+                                    notifier.removeCourse(course.code),
                                 icon: const Icon(Icons.playlist_add_check),
                               )
                             : IconButton.filled(
-                                onPressed: () => setState(() {
-                                  notifier.addCourse(widget.course.code);
-                                }),
+                                onPressed: () =>
+                                    notifier.addCourse(course.code),
                                 icon: const Icon(Icons.playlist_add_outlined),
                               ),
                       ]
@@ -135,10 +144,10 @@ class _CourseCardState extends ConsumerState<CourseCard> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                widget.course.term,
+                                course.term,
                               ),
                               Text(
-                                widget.course.period.join(','),
+                                course.period.join(','),
                               )
                             ],
                           ),
@@ -152,10 +161,16 @@ class _CourseCardState extends ConsumerState<CourseCard> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                widget.course.class_,
-                                style: Theme.of(context).textTheme.labelMedium,
-                              ),
+                              course.class_ != ''
+                                  ? Text(
+                                      course.class_,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .labelMedium,
+                                    )
+                                  : const SizedBox(
+                                      height: 16,
+                                    ),
                               Link(
                                 uri: Uri(
                                     scheme: 'https',
@@ -164,7 +179,7 @@ class _CourseCardState extends ConsumerState<CourseCard> {
                                     queryParameters: {
                                       'value(risyunen)': '2024',
                                       'value(semekikn)': '1',
-                                      'value(kougicd)': widget.course.code,
+                                      'value(kougicd)': course.code,
                                       'value(crclumcd)': data.crclumcd,
                                     }),
                                 target: LinkTarget.blank,
@@ -173,7 +188,13 @@ class _CourseCardState extends ConsumerState<CourseCard> {
                                     InkWell(
                                   onTap: followLink,
                                   child: Text(
-                                    widget.course.name,
+                                    course.altTarget.any((target) =>
+                                            target != "" &&
+                                            (data.crclumcd
+                                                    ?.startsWith(target) ??
+                                                false))
+                                        ? course.altName
+                                        : course.name,
                                     style: Theme.of(context)
                                         .textTheme
                                         .titleLarge!
@@ -185,9 +206,43 @@ class _CourseCardState extends ConsumerState<CourseCard> {
                                   ),
                                 ),
                               ),
-                              Text(
-                                widget.course.note,
-                                style: Theme.of(context).textTheme.labelMedium,
+                              Row(
+                                children: [
+                                  if (course.early || course.note != '')
+                                    Text(
+                                      '(',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .labelMedium,
+                                    ),
+                                  if (course.early)
+                                    Text(
+                                      '9:00開始',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .labelMedium,
+                                    ),
+                                  if (course.early && course.note != '')
+                                    const SizedBox(
+                                      width: 8,
+                                    ),
+                                  if (course.note != '')
+                                    Text(
+                                      course.note,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .labelMedium,
+                                    ),
+                                  if (course.early || course.note != '')
+                                    Text(
+                                      ')',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .labelMedium,
+                                    ),
+                                  if (!course.early && course.note == '')
+                                    const SizedBox(height: 16),
+                                ],
                               ),
                             ],
                           ),
@@ -198,11 +253,10 @@ class _CourseCardState extends ConsumerState<CourseCard> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                widget.course.category[data.crclumcd] ?? 'シラバス',
+                                course.category[data.crclumcd] ?? 'シラバス',
                               ),
                               Text(
-                                widget.course.compulsoriness[data.crclumcd] ??
-                                    '未公開',
+                                course.compulsoriness[data.crclumcd] ?? '未公開',
                               ),
                             ],
                           ),
@@ -212,10 +266,7 @@ class _CourseCardState extends ConsumerState<CourseCard> {
                           child: Align(
                             alignment: Alignment.centerRight,
                             child: Text(
-                              '${widget.course.credits[data.crclumcd] ?? '-'}単位',
-                              style: const TextStyle(fontFeatures: [
-                                FontFeature.tabularFigures(),
-                              ]),
+                              '${course.credits[data.crclumcd] ?? '-'}単位',
                             ),
                           ),
                         ),
@@ -223,19 +274,16 @@ class _CourseCardState extends ConsumerState<CourseCard> {
                         const SizedBox(
                           width: 8,
                         ),
-                        (data.enrolledCourses?.contains(widget.course.code) ??
-                                false)
+                        (data.enrolledCourses?.contains(course.code) ?? false)
                             ? OutlinedButton.icon(
-                                onPressed: () => setState(() {
-                                  notifier.removeCourse(widget.course.code);
-                                }),
+                                onPressed: () =>
+                                    notifier.removeCourse(course.code),
                                 icon: const Icon(Icons.playlist_add_check),
                                 label: const Text('取消'),
                               )
                             : FilledButton.icon(
-                                onPressed: () => setState(() {
-                                  notifier.addCourse(widget.course.code);
-                                }),
+                                onPressed: () =>
+                                    notifier.addCourse(course.code),
                                 icon: const Icon(Icons.playlist_add_outlined),
                                 label: const Text('登録'),
                               ),

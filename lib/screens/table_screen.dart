@@ -110,8 +110,8 @@ class TableScreen extends ConsumerWidget {
           ),
         ],
       ),
-      loading: () => const CircularProgressIndicator(),
-      error: (error, stackTrace) => Text('Error: $error'),
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (error, stackTrace) => Center(child: Text('Error: $error')),
     );
   }
 }

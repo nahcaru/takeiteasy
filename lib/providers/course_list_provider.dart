@@ -109,12 +109,14 @@ class CourseListNotifier extends Notifier<List<Course>> {
       for (String key in codes.keys) {
         if (codes[key]!.contains(crclumcd)) {
           for (Course course in courseMap[key]!) {
-            if (course.target.any((target) => crclumcd.startsWith(target))) {
+            if (course.target
+                .any((target) => target != '' && crclumcd.startsWith(target))) {
               _courses.add(course);
             }
           }
           for (Course course in courseMap['共通']!) {
-            if (course.target.any((target) => crclumcd.startsWith(target))) {
+            if (course.target
+                .any((target) => target != '' && crclumcd.startsWith(target))) {
               _courses.add(course);
             }
           }

@@ -178,7 +178,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                           child: Column(
                             children: [
                               const Text('時間割作成をもっと簡単に'),
-                              const Text('最終更新日:2024/03/28'),
+                              const Text('最終更新日:2024/03/31'),
                               const SizedBox(height: 8.0),
                               Link(
                                 uri: Uri.parse(
@@ -403,7 +403,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                                 child: Column(
                                   children: [
                                     const Text('時間割作成をもっと簡単に'),
-                                    const Text('最終更新日:2024/03/28'),
+                                    const Text('最終更新日:2024/03/31'),
                                     const SizedBox(height: 8.0),
                                     Link(
                                       uri: Uri.parse(
@@ -432,7 +432,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                         width: 256,
                         child: Column(
                           children: [
-                            const Text('最終更新日:2024/03/28'),
+                            const Text('最終更新日:2024/03/31'),
                             const SizedBox(height: 8.0),
                             Link(
                               uri: Uri.parse(
