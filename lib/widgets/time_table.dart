@@ -100,14 +100,19 @@ class CourseWrap extends StatelessWidget {
         TableRow(
           children: [
             TableCell(
-                child: SizedBox(
-              height: 240,
-              child: Wrap(
-                children: courses
-                    .map((course) => TableCard(
-                          data: [course],
-                        ))
-                    .toList(),
+                child: ConstrainedBox(
+              constraints: const BoxConstraints(
+                minHeight: 248,
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(4.0),
+                child: Column(
+                  children: courses
+                      .map((course) => TableCard(
+                            data: [course],
+                          ))
+                      .toList(),
+                ),
               ),
             )),
           ],
@@ -203,12 +208,20 @@ class TimeTable extends StatelessWidget {
     required this.isPortrait,
   });
   final bool isPortrait;
-  final List<String> times = const [
-    '9:20 ～ 11:00',
-    '11:10 ～ 12:50',
-    '13:40 ～ 15:20',
-    '15:30 ～ 17:10',
-    '17:20 ～ 19:00',
+  final List<String> startTimes = const [
+    '9:20',
+    '11:10',
+    '13:40',
+    '15:30',
+    '17:20',
+  ];
+  final String space = ' ~ ';
+  final List<String> endTimes = const [
+    '11:00',
+    '12:50',
+    '15:20',
+    '17:10',
+    '19:00',
   ];
   @override
   Widget build(BuildContext context) {
@@ -219,7 +232,7 @@ class TimeTable extends StatelessWidget {
             borderRadius: BorderRadius.circular(4.0)),
         children: isPortrait
             ? [
-                for (int i = 0; i < times.length; i++)
+                for (int i = 0; i < startTimes.length; i++)
                   TableRow(
                     children: [
                       TableCell(
@@ -229,9 +242,26 @@ class TimeTable extends StatelessWidget {
                         ),
                       ),
                       TableCell(
-                        child: Text(
-                          times[i],
-                          textAlign: TextAlign.center,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            SizedBox(
+                              width: 42,
+                              child: Text(
+                                startTimes[i],
+                                textAlign: TextAlign.end,
+                              ),
+                            ),
+                            Text(
+                              space,
+                            ),
+                            SizedBox(
+                              width: 42,
+                              child: Text(
+                                endTimes[i],
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
@@ -240,7 +270,7 @@ class TimeTable extends StatelessWidget {
             : [
                 TableRow(
                   children: [
-                    for (int i = 0; i < times.length; i++)
+                    for (int i = 0; i < startTimes.length; i++)
                       TableCell(
                         child: Text(
                           '${i + 1}時限',
@@ -251,11 +281,28 @@ class TimeTable extends StatelessWidget {
                 ),
                 TableRow(
                   children: [
-                    for (int i = 0; i < times.length; i++)
+                    for (int i = 0; i < startTimes.length; i++)
                       TableCell(
-                        child: Text(
-                          times[i],
-                          textAlign: TextAlign.center,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            SizedBox(
+                              width: 42,
+                              child: Text(
+                                startTimes[i],
+                                textAlign: TextAlign.end,
+                              ),
+                            ),
+                            Text(
+                              space,
+                            ),
+                            SizedBox(
+                              width: 42,
+                              child: Text(
+                                endTimes[i],
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                   ],

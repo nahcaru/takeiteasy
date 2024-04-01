@@ -134,11 +134,15 @@ class UserDataNotifier extends AsyncNotifier<UserData> {
     });
   }
 
-  Future<void> setCredits(String key, double value) async {
+  Future<void> setCredits(String key, double? value) async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
       Map<String, double> tookCredits = state.value?.tookCredits ?? {};
-      tookCredits[key] = value;
+      if (value == null) {
+        tookCredits.remove(key);
+      } else {
+        tookCredits[key] = value;
+      }
       _updateData({'tookCredits': tookCredits});
       return state.value!.copyWith(tookCredits: tookCredits);
     });

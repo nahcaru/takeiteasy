@@ -98,9 +98,7 @@ class TableScreen extends ConsumerWidget {
                               const SizedBox(
                                 height: 16,
                               ),
-                              CreditsTable(
-                                  data: notifier.getCoursesByCodes(
-                                      data.enrolledCourses ?? [])),
+                              const CreditsTable(isSpring: true)
                             ],
                           )
                         : Row(
@@ -115,10 +113,10 @@ class TableScreen extends ConsumerWidget {
                               const SizedBox(
                                 width: 16,
                               ),
-                              Expanded(
+                              const Expanded(
                                   child: CreditsTable(
-                                      data: notifier.getCoursesByCodes(
-                                          data.enrolledCourses ?? []))),
+                                isSpring: true,
+                              )),
                             ],
                           ),
                   ],
@@ -185,12 +183,11 @@ class TableScreen extends ConsumerWidget {
                               const SizedBox(
                                 height: 16,
                               ),
-                              CreditsTable(
-                                  data: notifier.getCoursesByCodes(
-                                      data.enrolledCourses ?? [])),
+                              const CreditsTable(isSpring: false),
                             ],
                           )
                         : Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Expanded(
                                 child: CourseWrap(
@@ -202,10 +199,8 @@ class TableScreen extends ConsumerWidget {
                               const SizedBox(
                                 width: 16,
                               ),
-                              Expanded(
-                                  child: CreditsTable(
-                                      data: notifier.getCoursesByCodes(
-                                          data.enrolledCourses ?? []))),
+                              const Expanded(
+                                  child: CreditsTable(isSpring: false)),
                             ],
                           ),
                   ],
