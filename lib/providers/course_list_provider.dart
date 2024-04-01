@@ -37,7 +37,17 @@ class CourseListNotifier extends Notifier<List<Course>> {
   bool _enrolledOnly = false;
   final Map<String, Map<String, bool>> _filters = {
     '学年': {'1年': false, '2年': false, '3年': false, '4年': false},
-    '学期': {'前期前': false, '前期後': false, '前期': false, '前集中': false, '通年': false},
+    '学期': {
+      '前期前': false,
+      '前期後': false,
+      '前期': false,
+      '前集中': false,
+      '後期前': false,
+      '後期後': false,
+      '後期': false,
+      '後集中': false,
+      '通年': false
+    },
     '分類': {
       '教養科目': false,
       '体育科目': false,
@@ -216,26 +226,44 @@ class CourseListNotifier extends Notifier<List<Course>> {
     }
     List<String>? enrolledCourses = ref.watch(userDataNotifierProvider
         .select((asyncValue) => asyncValue.value?.enrolledCourses));
-    List<String> formerTerms = const ['前期', '前期前', '後期', '後期前'];
-    List<String> latterTerms = const ['前期', '前期後', '後期', '後期後'];
-    Set<String>? formerEnrolledPeriods =
-        getCoursesByTerms(enrolledCourses ?? [], formerTerms)
+    List<String> springFormerTerms = const ['前期', '前期前'];
+    List<String> springLatterTerms = const ['前期', '前期後'];
+    List<String> fallFormerTerms = const ['後期', '後期前'];
+    List<String> fallLatterTerms = const ['後期', '後期後'];
+    Set<String>? springFormerEnrolledPeriods =
+        getCoursesByTerms(enrolledCourses ?? [], springFormerTerms)
             .map((course) => course.period)
             .expand((element) => element)
             .toSet();
-    Set<String>? latterEnrolledPeriods =
-        getCoursesByTerms(enrolledCourses ?? [], latterTerms)
+    Set<String>? springLatterEnrolledPeriods =
+        getCoursesByTerms(enrolledCourses ?? [], springLatterTerms)
+            .map((course) => course.period)
+            .expand((element) => element)
+            .toSet();
+    Set<String>? fallFormerEnrolledPeriods =
+        getCoursesByTerms(enrolledCourses ?? [], fallFormerTerms)
+            .map((course) => course.period)
+            .expand((element) => element)
+            .toSet();
+    Set<String>? fallLatterEnrolledPeriods =
+        getCoursesByTerms(enrolledCourses ?? [], fallLatterTerms)
             .map((course) => course.period)
             .expand((element) => element)
             .toSet();
     if (_blankOnly) {
       targetCourses = targetCourses.where((course) {
-        if (formerTerms.contains(course.term)) {
+        if (springFormerTerms.contains(course.term)) {
           return course.period
-              .every((period) => !formerEnrolledPeriods.contains(period));
-        } else if (latterTerms.contains(course.term)) {
+              .every((period) => !springFormerEnrolledPeriods.contains(period));
+        } else if (springLatterTerms.contains(course.term)) {
           return course.period
-              .every((period) => !latterEnrolledPeriods.contains(period));
+              .every((period) => !springLatterEnrolledPeriods.contains(period));
+        } else if (fallFormerTerms.contains(course.term)) {
+          return course.period
+              .every((period) => !fallFormerEnrolledPeriods.contains(period));
+        } else if (fallLatterTerms.contains(course.term)) {
+          return course.period
+              .every((period) => !fallLatterEnrolledPeriods.contains(period));
         } else {
           return true;
         }

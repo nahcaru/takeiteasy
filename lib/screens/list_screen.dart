@@ -23,7 +23,6 @@ class ListScreen extends ConsumerWidget {
               headerSliverBuilder:
                   (BuildContext context, bool innerBoxIsScrolled) => [
                 SliverAppBar(
-                  pinned: true,
                   floating: true,
                   toolbarHeight: 0,
                   expandedHeight: isPortrait ? 96 : 56,

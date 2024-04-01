@@ -58,7 +58,7 @@ class CourseDialog extends ConsumerWidget {
                   const TableRow(
                     children: [
                       Text('9:00開始'),
-                      Text('○'),
+                      Text('9:00 ～ 10:40'),
                     ],
                   ),
                 TableRow(
@@ -110,12 +110,13 @@ class CourseDialog extends ConsumerWidget {
                     Text(course.code),
                   ],
                 ),
-                TableRow(
-                  children: [
-                    const Text('教室'),
-                    Text(course.room.join('\n')),
-                  ],
-                ),
+                if (course.room.first != "")
+                  TableRow(
+                    children: [
+                      const Text('教室'),
+                      Text(course.room.join('\n')),
+                    ],
+                  ),
                 if (course.note != "")
                   TableRow(
                     children: [

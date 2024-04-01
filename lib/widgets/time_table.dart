@@ -100,20 +100,14 @@ class CourseWrap extends StatelessWidget {
         TableRow(
           children: [
             TableCell(
-                child: Padding(
-              padding: const EdgeInsets.all(4.0),
-              child: SizedBox(
-                height: 240,
-                child: Wrap(
-                  children: courses
-                      .map((course) => Padding(
-                            padding: const EdgeInsets.all(4.0),
-                            child: TableCard(
-                              data: [course],
-                            ),
-                          ))
-                      .toList(),
-                ),
+                child: SizedBox(
+              height: 240,
+              child: Wrap(
+                children: courses
+                    .map((course) => TableCard(
+                          data: [course],
+                        ))
+                    .toList(),
               ),
             )),
           ],
