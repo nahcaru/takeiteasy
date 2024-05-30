@@ -1,11 +1,11 @@
 {
-    "name": "TCU Take it Easy",
+    "name": "TCU Take it Easier",
     "short_name": "TCU-TiE",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#00A7EB",
-    "theme_color": "#00A7EB",
-    "description": "時間割作成をもっと簡単に",
+    "background_color": "#0175C2",
+    "theme_color": "#0175C2",
+    "description": "履修登録をもっと簡単に",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
