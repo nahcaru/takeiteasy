@@ -118,7 +118,9 @@ class UserDataNotifier extends AsyncNotifier<UserData> {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
       List<String> enrolledCourses = state.value?.enrolledCourses ?? [];
-      enrolledCourses.add(code);
+      if (!enrolledCourses.contains(code)) {
+        enrolledCourses.add(code);
+      }
       _updateData({'enrolledCourses': enrolledCourses});
       return state.value!.copyWith(enrolledCourses: enrolledCourses);
     });

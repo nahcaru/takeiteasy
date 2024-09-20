@@ -26,7 +26,14 @@ class CourseTable extends StatelessWidget {
         table[time][day].add(course);
       }
     }
-
+    // return Column(
+    //   children: table
+    //       .map((row) => row.map((cell) => TableCard(
+    //             data: cell,
+    //           )))
+    //       .expand((element) => element)
+    //       .toList(),
+    // );
     return Table(
       defaultVerticalAlignment: TableCellVerticalAlignment.middle,
       border: TableBorder.all(
@@ -54,7 +61,7 @@ class CourseTable extends StatelessWidget {
             children: [
               TableCell(
                   child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                padding: const EdgeInsets.all(4.0),
                 child: Text(
                   '${i + 1}時限',
                   textAlign: TextAlign.center,
@@ -138,63 +145,63 @@ class TableCard extends StatelessWidget {
       );
     } else if (data.length == 1) {
       return InkWell(
-        onTap: () {
-          showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return CourseDialog(data.first);
-            },
-          );
-        },
-        child: Card(
-          color: Theme.of(context).colorScheme.secondaryContainer,
-          child: Container(
-            height: 50,
-            alignment: Alignment.center,
-            child: Text(
-              data.first.name,
-              style: TextStyle(
-                  color: Theme.of(context).colorScheme.onSecondaryContainer),
-              textAlign: TextAlign.center,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
+        onTap: () => showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return CourseDialog(data.first);
+          },
+        ),
+        child: Container(
+          margin: const EdgeInsets.all(4.0),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.secondaryContainer,
+            borderRadius: BorderRadius.circular(4.0),
+          ),
+          height: 50,
+          alignment: Alignment.center,
+          child: Text(
+            data.first.name,
+            style: TextStyle(
+                color: Theme.of(context).colorScheme.onSecondaryContainer),
+            maxLines: 2,
+            textAlign: TextAlign.center,
+            overflow: TextOverflow.ellipsis,
           ),
         ),
       );
     } else {
       return InkWell(
-        onTap: () {
-          showDialog(
-              context: context,
-              builder: (BuildContext context) {
-                return AlertDialog(
-                  title: const Text('科目が重複しています'),
-                  content: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Text(
-                        data.map((course) => course.name).join('\n'),
-                      ),
-                    ],
-                  ),
-                  scrollable: true,
-                );
-              });
-        },
-        child: Card(
-          color: Theme.of(context).colorScheme.errorContainer,
-          child: Container(
-            alignment: Alignment.center,
-            height: 50,
-            child: Text(
-              '重複',
-              style: TextStyle(
-                  color: Theme.of(context).colorScheme.onErrorContainer),
-              textAlign: TextAlign.center,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
+        onTap: () => showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: const Text('科目が重複しています'),
+                content: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Text(
+                      data.map((course) => course.name).join('\n'),
+                    ),
+                  ],
+                ),
+                scrollable: true,
+              );
+            }),
+        child: Container(
+          margin: const EdgeInsets.all(4.0),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.errorContainer,
+            borderRadius: BorderRadius.circular(4.0),
+          ),
+          alignment: Alignment.center,
+          height: 50,
+          child: Text(
+            '重複',
+            style: TextStyle(
+                color: Theme.of(context).colorScheme.onErrorContainer),
+            maxLines: 2,
+            textAlign: TextAlign.center,
+            overflow: TextOverflow.ellipsis,
           ),
         ),
       );

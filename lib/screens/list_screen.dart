@@ -6,11 +6,12 @@ import '../providers/course_list_provider.dart';
 import '../providers/user_data_provider.dart';
 import '../widgets/choice_box.dart';
 import '../widgets/course_card.dart';
-import '../widgets/filters.dart';
+import '../widgets/filter_column.dart';
 import '../widgets/search_box.dart';
 
 class ListScreen extends ConsumerWidget {
   const ListScreen({super.key});
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final AsyncValue<UserData> asyncValue = ref.watch(userDataNotifierProvider);
@@ -49,9 +50,8 @@ class ListScreen extends ConsumerWidget {
                                       isScrollControlled: true,
                                       builder: (BuildContext context) =>
                                           SingleChildScrollView(
-                                        child: Filters(
+                                        child: FilterColumn(
                                           crclumcd: data.crclumcd,
-                                          isPortrait: false,
                                         ),
                                       ),
                                     );
@@ -99,9 +99,9 @@ class ListScreen extends ConsumerWidget {
                               alignment: Alignment.topCenter,
                               child: SingleChildScrollView(
                                   primary: false,
-                                  child: Filters(
-                                      crclumcd: data.crclumcd,
-                                      isPortrait: false)),
+                                  child: FilterColumn(
+                                    crclumcd: data.crclumcd,
+                                  )),
                             )),
                         const VerticalDivider(
                           width: 0,

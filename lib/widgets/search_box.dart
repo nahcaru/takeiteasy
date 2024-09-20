@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../providers/filter_provider.dart';
 import '../providers/course_list_provider.dart';
 
 class SearchBox extends ConsumerStatefulWidget {
@@ -12,7 +13,10 @@ class SearchBox extends ConsumerStatefulWidget {
 class _SearchBoxState extends ConsumerState<SearchBox> {
   @override
   Widget build(BuildContext context) {
-    final notifier = ref.read(courseListNotifierProvider.notifier);
+    final FilterNotifier filterNotifier =
+        ref.read(filterNotifierProvider.notifier);
+    final CourseListNotifier courseListNotifier =
+        ref.read(courseListNotifierProvider.notifier);
     return SearchAnchor.bar(
       searchController: SearchBox.searchController,
       onSubmitted: (value) {
@@ -22,7 +26,7 @@ class _SearchBoxState extends ConsumerState<SearchBox> {
           });
         }
         FocusScope.of(context).unfocus();
-        notifier.search(value);
+        filterNotifier.search(value);
       },
       barHintText: '検索',
       barTrailing: [
@@ -31,14 +35,14 @@ class _SearchBoxState extends ConsumerState<SearchBox> {
               icon: const Icon(Icons.clear),
               onPressed: () => setState(() {
                     SearchBox.searchController.clear();
-                    notifier.search('');
+                    filterNotifier.search('');
                   }))
       ],
       constraints: const BoxConstraints(
         minHeight: 40,
         maxWidth: 300,
       ),
-      suggestionsBuilder: (context, controller) => notifier
+      suggestionsBuilder: (context, controller) => courseListNotifier
           .suggestion(controller.text)
           .map((course) => ListTile(
                 title: Text(course.name),
@@ -47,7 +51,7 @@ class _SearchBoxState extends ConsumerState<SearchBox> {
                     controller.closeView(course.name);
                   });
                   FocusScope.of(context).unfocus();
-                  notifier.search(course.name);
+                  filterNotifier.search(course.name);
                 },
               ))
           .toList(),
