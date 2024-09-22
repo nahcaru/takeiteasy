@@ -279,7 +279,7 @@ class CourseCard extends ConsumerWidget {
                                 onPressed: () =>
                                     notifier.removeCourse(course.code),
                                 icon: const Icon(Icons.playlist_add_check),
-                                label: const Text('取消'),
+                                label: const Text('解除'),
                               )
                             : FilledButton.icon(
                                 onPressed: () =>
