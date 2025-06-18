@@ -102,6 +102,8 @@ class CreditsTable extends ConsumerWidget {
                                 ?.toString(),
                             textAlign: TextAlign.center,
                             decoration: InputDecoration(
+                              contentPadding:
+                                  const EdgeInsets.symmetric(vertical: 8),
                               isDense: true,
                               hintText: "(0)",
                               filled:
