@@ -3,7 +3,9 @@ import 'dart:convert';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/course.dart';
+import '../models/filter.dart';
 import 'user_data_provider.dart';
+import 'filter_provider.dart';
 
 final courseMapNotifierProvider =
     AsyncNotifierProvider<CourseMapNotifier, Map<String, List<Course>>>(() {
@@ -33,33 +35,6 @@ final courseListNotifierProvider =
 
 class CourseListNotifier extends Notifier<List<Course>> {
   final List<Course> _courses = [];
-  String _searchText = '';
-  bool _enrolledOnly = false;
-  final Map<String, Map<String, bool>> _filters = {
-    '学年': {'1年': false, '2年': false, '3年': false, '4年': false},
-    '学期': {
-      '前期前': false,
-      '前期後': false,
-      '前期': false,
-      '前集中': false,
-      '後期前': false,
-      '後期後': false,
-      '後期': false,
-      '後集中': false,
-      '通年': false
-    },
-    '分類': {
-      '教養科目': false,
-      '体育科目': false,
-      '外国語科目': false,
-      'PBL科目': false,
-      '情報工学基盤': false,
-      '専門': false,
-      '教職科目': false,
-    },
-    '必選': {'必修': false, '選択必修': false, '選択': false}
-  };
-  bool _internationalSpecified = false;
   final List<String> _internationalSpecifiedCourses = const [
     'Test Taking Skills(3a)',
     'Test Taking Skills(3b)',
@@ -84,7 +59,6 @@ class CourseListNotifier extends Notifier<List<Course>> {
     'Language Sciences(2a)',
     'Language Sciences(2b)',
   ];
-  bool _blankOnly = false;
 
   @override
   List<Course> build() {
@@ -93,6 +67,9 @@ class CourseListNotifier extends Notifier<List<Course>> {
         ref.watch(courseMapNotifierProvider).value;
     final String? crclumcd = ref.watch(userDataNotifierProvider
         .select((asyncValue) => asyncValue.value?.crclumcd));
+    ref.watch(filterNotifierProvider);
+    ref.watch(userDataNotifierProvider
+        .select((asyncValue) => asyncValue.value?.enrolledCourses?.length));
     const Map<String, List<String>> codes = {
       '情科': [
         's21310',
@@ -134,7 +111,7 @@ class CourseListNotifier extends Notifier<List<Course>> {
       }
     }
     sortPeriods();
-    return filter();
+    return applyFilter();
   }
 
   void sortPeriods() {
@@ -189,68 +166,41 @@ class CourseListNotifier extends Notifier<List<Course>> {
         .toList();
   }
 
-  void setEnrolledOnly(bool value) {
-    _enrolledOnly = value;
-  }
-
-  void setInternationalSpecified(bool value) {
-    _internationalSpecified = value;
-  }
-
-  void setBlankOnly(bool value) {
-    _blankOnly = value;
-  }
-
-  void search(String text) {
-    _searchText = text;
-    applyFilter();
-  }
-
-  void setFilters(Map<String, Map<String, bool>> filters) {
-    _filters.clear();
-    _filters.addAll(filters);
-  }
-
-  void applyFilter() {
-    state = filter();
-  }
-
-  List<Course> filter() {
-    List<Course> targetCourses = suggestion(_searchText);
-    if (_enrolledOnly) {
-      List<String>? enrolledCourses = ref.watch(userDataNotifierProvider
-          .select((asyncValue) => asyncValue.value?.enrolledCourses));
+  List<Course> applyFilter() {
+    final Filter filter = ref.read(filterNotifierProvider);
+    List<Course> targetCourses = suggestion(filter.searchQuery);
+    List<String> enrolledCourses = ref.read(userDataNotifierProvider
+        .select((asyncValue) => asyncValue.value?.enrolledCourses ?? []));
+    if (filter.enrolledOnly) {
       targetCourses = targetCourses
           .where((course) => enrolledCourses?.contains(course.code) ?? false)
           .toList();
     }
-    List<String>? enrolledCourses = ref.watch(userDataNotifierProvider
-        .select((asyncValue) => asyncValue.value?.enrolledCourses));
     List<String> springFormerTerms = const ['前期', '前期前'];
     List<String> springLatterTerms = const ['前期', '前期後'];
     List<String> fallFormerTerms = const ['後期', '後期前'];
     List<String> fallLatterTerms = const ['後期', '後期後'];
-    Set<String>? springFormerEnrolledPeriods =
-        getCoursesByTerms(enrolledCourses ?? [], springFormerTerms)
+    Set<String> springFormerEnrolledPeriods =
+        getCoursesByTerms(enrolledCourses, springFormerTerms)
             .map((course) => course.period)
             .expand((element) => element)
             .toSet();
-    Set<String>? springLatterEnrolledPeriods =
-        getCoursesByTerms(enrolledCourses ?? [], springLatterTerms)
+    Set<String> springLatterEnrolledPeriods =
+        getCoursesByTerms(enrolledCourses, springLatterTerms)
             .map((course) => course.period)
             .expand((element) => element)
             .toSet();
-    Set<String>? fallFormerEnrolledPeriods =
-        getCoursesByTerms(enrolledCourses ?? [], fallFormerTerms)
+    Set<String> fallFormerEnrolledPeriods =
+        getCoursesByTerms(enrolledCourses, fallFormerTerms)
             .map((course) => course.period)
             .expand((element) => element)
             .toSet();
-    Set<String>? fallLatterEnrolledPeriods =
-        getCoursesByTerms(enrolledCourses ?? [], fallLatterTerms)
+    Set<String> fallLatterEnrolledPeriods =
+        getCoursesByTerms(enrolledCourses, fallLatterTerms)
             .map((course) => course.period)
             .expand((element) => element)
             .toSet();
-    if (_blankOnly) {
+    if (filter.blankOnly) {
       targetCourses = targetCourses.where((course) {
         if (springFormerTerms.contains(course.term)) {
           return course.period
@@ -269,34 +219,34 @@ class CourseListNotifier extends Notifier<List<Course>> {
         }
       }).toList();
     }
-    if (_internationalSpecified) {
+    if (filter.internationalSpecified) {
       targetCourses = targetCourses
           .where(
               (course) => _internationalSpecifiedCourses.contains(course.name))
           .toList();
     }
     return targetCourses.where((course) {
-      bool gradeFilter = (_filters['学年']!['${course.grade}年'] ?? false) ||
-          _filters['学年']!.values.every((element) => element == false);
-      bool termFilter = (_filters['学期']![course.term] ?? false) ||
-          _filters['学期']!.values.every((element) => element == false);
-      String? crclumcd = ref.watch(userDataNotifierProvider
+      bool gradeFilter = (filter.filters['学年']!['${course.grade}年'] ?? false) ||
+          filter.filters['学年']!.values.every((element) => element == false);
+      bool termFilter = (filter.filters['学期']![course.term] ?? false) ||
+          filter.filters['学期']!.values.every((element) => element == false);
+      String? crclumcd = ref.read(userDataNotifierProvider
           .select((asyncValue) => asyncValue.value?.crclumcd));
       bool categoryFilter =
-          (_filters['分類']![course.category[crclumcd]] ?? false) ||
-              _filters['分類']!.values.every((element) => element == false);
+          (filter.filters['分類']![course.category[crclumcd]] ?? false) ||
+              filter.filters['分類']!.values.every((element) => element == false);
       bool compulsorinessFilter;
       if (course.compulsoriness[crclumcd] == '必修') {
-        compulsorinessFilter = _filters['必選']!['必修']!;
+        compulsorinessFilter = filter.filters['必選']!['必修']!;
       } else if (course.compulsoriness[crclumcd]?.contains('選択必修') ?? false) {
-        compulsorinessFilter = _filters['必選']!['選択必修']!;
+        compulsorinessFilter = filter.filters['必選']!['選択必修']!;
       } else if (course.compulsoriness[crclumcd] != null) {
-        compulsorinessFilter = _filters['必選']!['選択']!;
+        compulsorinessFilter = filter.filters['必選']!['選択']!;
       } else {
         compulsorinessFilter = false;
       }
       compulsorinessFilter = compulsorinessFilter ||
-          _filters['必選']!.values.every((element) => element == false);
+          filter.filters['必選']!.values.every((element) => element == false);
       return gradeFilter &&
           termFilter &&
           categoryFilter &&
@@ -305,7 +255,10 @@ class CourseListNotifier extends Notifier<List<Course>> {
   }
 
   List<Course> getCoursesByCodes(List<String> codes) {
-    return _courses.where((element) => codes.contains(element.code)).toList();
+    //return _courses.where((element) => codes.contains(element.code)).toList();
+    return codes
+        .map((code) => _courses.firstWhere((element) => code == element.code))
+        .toList();
   }
 
   List<Course> getCoursesByTerms(List<String> codes, List<String> terms) {

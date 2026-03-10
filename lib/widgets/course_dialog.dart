@@ -136,7 +136,7 @@ class CourseDialog extends ConsumerWidget {
                     notifier.removeCourse(course.code);
                     Navigator.of(context).pop();
                   },
-                  child: const Text('取消'),
+                  child: const Text('解除'),
                 )
               : TextButton(
                   onPressed: () {

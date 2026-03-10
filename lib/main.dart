@@ -4,8 +4,6 @@ import 'package:firebase_auth/firebase_auth.dart' hide EmailAuthProvider;
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:firebase_ui_oauth_google/firebase_ui_oauth_google.dart';
 import 'package:firebase_ui_localizations/firebase_ui_localizations.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -180,7 +178,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                           child: Column(
                             children: [
                               const Text('時間割作成をもっと簡単に'),
-                              const Text('最終更新日:2024/04/2'),
+                              const Text('最終更新日:2024/04/3'),
                               const SizedBox(height: 8.0),
                               Link(
                                 uri: Uri.parse(
@@ -405,7 +403,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                                 child: Column(
                                   children: [
                                     const Text('時間割作成をもっと簡単に'),
-                                    const Text('最終更新日:2024/04/2'),
+                                    const Text('最終更新日:2024/04/3'),
                                     const SizedBox(height: 8.0),
                                     Link(
                                       uri: Uri.parse(
@@ -434,7 +432,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                         width: 256,
                         child: Column(
                           children: [
-                            const Text('最終更新日:2024/04/2'),
+                            const Text('最終更新日:2024/04/3'),
                             const SizedBox(height: 8.0),
                             Link(
                               uri: Uri.parse(

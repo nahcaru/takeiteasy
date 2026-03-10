@@ -91,7 +91,7 @@ class TableScreen extends ConsumerWidget {
                         ? Column(
                             children: [
                               CourseWrap(
-                                  title: '通年・集中',
+                                  title: '通年/集中',
                                   courses: notifier.getCoursesByTerms(
                                       data.enrolledCourses ?? [],
                                       const ['通年', '前集中'])),
@@ -105,7 +105,7 @@ class TableScreen extends ConsumerWidget {
                             children: [
                               Expanded(
                                 child: CourseWrap(
-                                    title: '通年・集中',
+                                    title: '通年/集中',
                                     courses: notifier.getCoursesByTerms(
                                         data.enrolledCourses ?? [],
                                         const ['通年', '前集中'])),
@@ -176,7 +176,7 @@ class TableScreen extends ConsumerWidget {
                         ? Column(
                             children: [
                               CourseWrap(
-                                  title: '通年・集中',
+                                  title: '通年/集中',
                                   courses: notifier.getCoursesByTerms(
                                       data.enrolledCourses ?? [],
                                       const ['通年', '後集中'])),
@@ -191,7 +191,7 @@ class TableScreen extends ConsumerWidget {
                             children: [
                               Expanded(
                                 child: CourseWrap(
-                                    title: '通年・集中',
+                                    title: '通年/集中',
                                     courses: notifier.getCoursesByTerms(
                                         data.enrolledCourses ?? [],
                                         const ['通年', '後集中'])),
